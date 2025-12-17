@@ -141,8 +141,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Example: You would typically call an API here
         // For now, just show a toast
-        Intent intent = new Intent(this, SignUpActivity.class);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        if(userType.equals("seller") ) {
+            Intent intent = new Intent(this, SellerDashboardActivity.class);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void makeSignUpClickable() {

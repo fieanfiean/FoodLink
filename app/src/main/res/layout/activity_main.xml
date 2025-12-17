@@ -73,7 +73,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="16dp">
+                    android:padding="10dp">
 
                     <ImageView
                         android:id="@+id/ivSeller"
@@ -121,7 +121,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="16dp">
+                    android:padding="10dp">
 
                     <ImageView
                         android:id="@+id/ivCharity"
