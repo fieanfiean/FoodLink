@@ -776,7 +776,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="#FFFFFF"
-            app:menu="@menu/bottom_nav_seller"
+            app:menu="@menu/bottom_nav"
             app:itemIconTint="@color/bottom_nav_colors"
             app:itemTextColor="@color/bottom_nav_colors"
             app:labelVisibilityMode="labeled"

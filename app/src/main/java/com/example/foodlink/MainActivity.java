@@ -146,6 +146,11 @@ public class MainActivity extends AppCompatActivity {
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             startActivity(intent);
             finish();
+        } else if (userType.equals("charity")) {
+            Intent intent = new Intent(this, CharityDashboardActivity.class);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            startActivity(intent);
+            finish();
         }
     }
 

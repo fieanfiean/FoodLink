@@ -119,9 +119,8 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
 
     private void setupCategoryDropdown() {
         // Define categories
-        String[] categories = {"Vegetables", "Fruits", "Prepared Meals", "Baked Goods",
-                "Dairy Products", "Meat & Poultry", "Seafood", "Grains & Cereals",
-                "Beverages", "Other"};
+        String[] categories = {"All","Vegetables", "Fruits", "Bakery", "Prepared Food",
+                "Dairy", "Other"};
 
         // Create adapter for dropdown
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -129,7 +128,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         actvCategory.setAdapter(adapter);
 
         // Set default value
-        actvCategory.setText("Vegetables", false);
+        actvCategory.setText("All", false);
     }
 
     private void setupToolbar() {

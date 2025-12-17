@@ -16,6 +16,11 @@
         android:icon="@drawable/ic_add_circle"/>
 
     <item
+        android:id="@+id/nav_browse"
+        android:title="Browse"
+        android:icon="@drawable/ic_search" />
+
+    <item
         android:id="@+id/nav_reservations"
         android:title="Reservations"
         android:icon="@drawable/ic_reservations"/>

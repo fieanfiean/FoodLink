@@ -3,4 +3,40 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="green">#4CAF50</color>
+
+
+    <!-- Background colors -->
+    <color name="grey_600">#757575</color>
+
+    <!-- Text colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#666666</color>
+
+    <!-- Button colors -->
+    <color name="button_primary">#4CAF50</color>
+    <color name="button_secondary">#2196F3</color>
+
+    <color name="colorPrimary">#FF6B35</color> <!-- Orange-Red like tomato/bread -->
+    <color name="colorPrimaryDark">#E55A2B</color>
+    <color name="colorAccent">#4ECDC4</color> <!-- Fresh teal accent -->
+
+    <!-- Neutral Backgrounds -->
+    <color name="background_light">#F8F9FA</color> <!-- Light grey background -->
+    <color name="surface_white">#FFFFFF</color> <!-- White cards -->
+    <color name="grey_100">#F5F7FA</color> <!-- Very light grey -->
+    <color name="grey_300">#E1E8ED</color> <!-- Borders/divider -->
+    <color name="grey_500">#657786</color> <!-- Secondary text -->
+    <color name="grey_700">#14171A</color> <!-- Primary text -->
+
+    <!-- Status Colors -->
+    <color name="status_active">#34C759</color> <!-- Green for active/fresh -->
+    <color name="status_warning">#FF9500</color> <!-- Orange for expiring soon -->
+    <color name="status_expired">#FF3B30</color> <!-- Red for expired -->
+    <color name="status_info">#007AFF</color> <!-- Blue for info -->
+
+    <!-- Food Category Colors -->
+    <color name="food_bakery">#FFC107</color> <!-- Yellow for bakery -->
+    <color name="food_vegetables">#4CAF50</color> <!-- Green for vegetables -->
+    <color name="food_fruits">#E91E63</color> <!-- Pink for fruits -->
+    <color name="food_dairy">#2196F3</color> <!-- Blue for dairy -->
 </resources>

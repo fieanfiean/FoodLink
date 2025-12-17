@@ -29,6 +29,9 @@
             android:name=".SellerDashboardActivity"
             android:exported="false" />
         <activity
+            android:name=".CharityDashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".NotificationsActivity"
             android:exported="false"
             android:theme="@style/Theme.FoodLink.NoActionBar" />
@@ -44,6 +47,10 @@
         <activity
             android:name=".AddNewFoodListingActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+        <activity
+            android:name=".ReservationsActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

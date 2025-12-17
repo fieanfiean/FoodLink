@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:strokeColor="#E0E0E0"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <!-- Status Badge -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UPCOMING"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_status_upcoming"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:layout_gravity="end" />
+
+        <!-- Food Item -->
+        <TextView
+            android:id="@+id/tvFoodItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Assorted Fresh Bread"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <!-- Restaurant -->
+        <TextView
+            android:id="@+id/tvRestaurant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sunrise Bakery"
+            android:textSize="16sp"
+            android:textColor="#757575"
+            android:layout_marginTop="4dp" />
+
+        <!-- Details Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+
+            <!-- Quantity -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_quantity"
+                    app:tint="#757575" />
+
+                <TextView
+                    android:id="@+id/tvQuantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20 loaves"
+                    android:textSize="14sp"
+                    android:textColor="#757575"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- Pickup Time -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_time"
+                    app:tint="#757575" />
+
+                <TextView
+                    android:id="@+id/tvPickupTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pickup: 19:00-21:00"
+                    android:textSize="14sp"
+                    android:textColor="#757575"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Expiry Date -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_calendar"
+                app:tint="#757575" />
+
+            <TextView
+                android:id="@+id/tvExpiryDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expires: 2025-12-17"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:id="@+id/llActionButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnConfirmPickup"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Confirm Pickup"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/button_primary"
+                android:textColor="@android:color/white"
+                style="@style/Widget.MaterialComponents.Button" />
+
+            <Button
+                android:id="@+id/btnCancelReservation"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Cancel Reservation"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/status_expired"
+                android:textColor="@android:color/white"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:paddingHorizontal="0dp"
+                style="@style/Widget.MaterialComponents.Button" />
+
+        </LinearLayout>
+
+        <!-- For completed reservations, show different buttons -->
+        <LinearLayout
+            android:id="@+id/llCompletedActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btnViewDetails"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="View Details"
+                android:textAllCaps="false"
+                android:backgroundTint="?attr/colorPrimary"
+                android:textColor="@android:color/white"
+                style="@style/Widget.MaterialComponents.Button" />
+
+            <Button
+                android:id="@+id/btnReorder"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Reorder"
+                android:textAllCaps="false"
+                android:backgroundTint="@android:color/white"
+                android:textColor="?attr/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
