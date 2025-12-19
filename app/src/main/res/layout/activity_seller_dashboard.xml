@@ -10,15 +10,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
-            android:elevation="4dp">
+            android:elevation="4dp"
+            android:paddingTop="24dp">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="#FFFFFF"
-                app:titleTextColor="#1B5E20"
-                android:layout_marginTop="24dp">
+                app:titleTextColor="#1B5E20">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -54,12 +54,12 @@
                         app:tint="#666666"
                         android:layout_marginEnd="16dp"/>
 
-                    <ImageView
-                        android:id="@+id/ivProfile"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_profile"
-                        app:tint="#666666"/>
+<!--                    <ImageView-->
+<!--                        android:id="@+id/ivProfile"-->
+<!--                        android:layout_width="32dp"-->
+<!--                        android:layout_height="32dp"-->
+<!--                        android:src="@drawable/ic_profile"-->
+<!--                        app:tint="#666666"/>-->
                 </LinearLayout>
             </androidx.appcompat.widget.Toolbar>
 
@@ -366,358 +366,358 @@
                     android:orientation="vertical">
 
                     <!-- Listing 1: Fresh Vegetable Salad Mix -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#FFFFFF"
-                        android:layout_marginBottom="16dp">
+<!--                    <androidx.cardview.widget.CardView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        app:cardCornerRadius="12dp"-->
+<!--                        app:cardElevation="2dp"-->
+<!--                        app:cardBackgroundColor="#FFFFFF"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="16dp">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="horizontal"-->
+<!--                            android:padding="16dp">-->
 
-                            <!-- Food Image or Placeholder -->
-                            <androidx.cardview.widget.CardView
-                                android:layout_width="80dp"
-                                android:layout_height="80dp"
-                                app:cardCornerRadius="8dp"
-                                app:cardElevation="0dp"
-                                app:cardBackgroundColor="#F5F5F5"
-                                android:layout_marginEnd="16dp">
+<!--                            &lt;!&ndash; Food Image or Placeholder &ndash;&gt;-->
+<!--                            <androidx.cardview.widget.CardView-->
+<!--                                android:layout_width="80dp"-->
+<!--                                android:layout_height="80dp"-->
+<!--                                app:cardCornerRadius="8dp"-->
+<!--                                app:cardElevation="0dp"-->
+<!--                                app:cardBackgroundColor="#F5F5F5"-->
+<!--                                android:layout_marginEnd="16dp">-->
 
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:orientation="vertical"
-                                    android:gravity="center">
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="match_parent"-->
+<!--                                    android:orientation="vertical"-->
+<!--                                    android:gravity="center">-->
 
-                                    <ImageView
-                                        android:id="@+id/ivFood1"
-                                        android:layout_width="48dp"
-                                        android:layout_height="48dp"
-                                        android:src="@drawable/ic_vegetables"
-                                        app:tint="#4CAF50"/>
+<!--                                    <ImageView-->
+<!--                                        android:id="@+id/ivFood1"-->
+<!--                                        android:layout_width="48dp"-->
+<!--                                        android:layout_height="48dp"-->
+<!--                                        android:src="@drawable/ic_vegetables"-->
+<!--                                        app:tint="#4CAF50"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="No Image"
-                                        android:textSize="10sp"
-                                        android:textColor="#666666"
-                                        android:layout_marginTop="4dp"
-                                        android:visibility="gone"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="No Image"-->
+<!--                                        android:textSize="10sp"-->
+<!--                                        android:textColor="#666666"-->
+<!--                                        android:layout_marginTop="4dp"-->
+<!--                                        android:visibility="gone"/>-->
 
-                                </LinearLayout>
-                            </androidx.cardview.widget.CardView>
+<!--                                </LinearLayout>-->
+<!--                            </androidx.cardview.widget.CardView>-->
 
-                            <!-- Food Details -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_weight="1">
+<!--                            &lt;!&ndash; Food Details &ndash;&gt;-->
+<!--                            <LinearLayout-->
+<!--                                android:layout_width="0dp"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:orientation="vertical"-->
+<!--                                android:layout_weight="1">-->
 
-                                <!-- Title and Status -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical"
-                                    android:layout_marginBottom="8dp">
+<!--                                &lt;!&ndash; Title and Status &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:gravity="center_vertical"-->
+<!--                                    android:layout_marginBottom="8dp">-->
 
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="Fresh Vegetable Salad Mix"
-                                        android:textSize="16sp"
-                                        android:textColor="#333333"
-                                        android:textStyle="bold"
-                                        android:maxLines="1"
-                                        android:ellipsize="end"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="Fresh Vegetable Salad Mix"-->
+<!--                                        android:textSize="16sp"-->
+<!--                                        android:textColor="#333333"-->
+<!--                                        android:textStyle="bold"-->
+<!--                                        android:maxLines="1"-->
+<!--                                        android:ellipsize="end"/>-->
 
-                                    <TextView
-                                        android:id="@+id/tvStatus1"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Available"
-                                        android:textSize="12sp"
-                                        android:textColor="#4CAF50"
-                                        android:textStyle="bold"
-                                        android:background="@drawable/status_available_bg"
-                                        android:paddingHorizontal="8dp"
-                                        android:paddingVertical="4dp"/>
+<!--                                    <TextView-->
+<!--                                        android:id="@+id/tvStatus1"-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Available"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#4CAF50"-->
+<!--                                        android:textStyle="bold"-->
+<!--                                        android:background="@drawable/status_available_bg"-->
+<!--                                        android:paddingHorizontal="8dp"-->
+<!--                                        android:paddingVertical="4dp"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                                <!-- Food Type and Quantity -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Vegetables • 5 kg"
-                                    android:textSize="14sp"
-                                    android:textColor="#666666"
-                                    android:layout_marginBottom="8dp"/>
+<!--                                &lt;!&ndash; Food Type and Quantity &ndash;&gt;-->
+<!--                                <TextView-->
+<!--                                    android:layout_width="wrap_content"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:text="Vegetables • 5 kg"-->
+<!--                                    android:textSize="14sp"-->
+<!--                                    android:textColor="#666666"-->
+<!--                                    android:layout_marginBottom="8dp"/>-->
 
-                                <!-- Expiry and Pickup -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:layout_marginBottom="8dp">
+<!--                                &lt;!&ndash; Expiry and Pickup &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:layout_marginBottom="8dp">-->
 
-                                    <ImageView
-                                        android:layout_width="16dp"
-                                        android:layout_height="16dp"
-                                        android:src="@drawable/ic_calendar"
-                                        app:tint="#FF9800"
-                                        android:layout_marginEnd="4dp"/>
+<!--                                    <ImageView-->
+<!--                                        android:layout_width="16dp"-->
+<!--                                        android:layout_height="16dp"-->
+<!--                                        android:src="@drawable/ic_calendar"-->
+<!--                                        app:tint="#FF9800"-->
+<!--                                        android:layout_marginEnd="4dp"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Expiry: 2025-12-17"
-                                        android:textSize="12sp"
-                                        android:textColor="#666666"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Expiry: 2025-12-17"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#666666"/>-->
 
-                                    <View
-                                        android:layout_width="0dp"
-                                        android:layout_height="0dp"
-                                        android:layout_weight="1"/>
+<!--                                    <View-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="0dp"-->
+<!--                                        android:layout_weight="1"/>-->
 
-                                    <ImageView
-                                        android:layout_width="16dp"
-                                        android:layout_height="16dp"
-                                        android:src="@drawable/ic_time"
-                                        app:tint="#2196F3"
-                                        android:layout_marginEnd="4dp"/>
+<!--                                    <ImageView-->
+<!--                                        android:layout_width="16dp"-->
+<!--                                        android:layout_height="16dp"-->
+<!--                                        android:src="@drawable/ic_time"-->
+<!--                                        app:tint="#2196F3"-->
+<!--                                        android:layout_marginEnd="4dp"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Pickup: 18:00 - 20:00"
-                                        android:textSize="12sp"
-                                        android:textColor="#666666"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Pickup: 18:00 - 20:00"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#666666"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                                <!-- Action Buttons -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical">
+<!--                                &lt;!&ndash; Action Buttons &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:gravity="center_vertical">-->
 
-                                    <com.google.android.material.button.MaterialButton
-                                        android:layout_width="0dp"
-                                        android:layout_height="36dp"
-                                        android:layout_weight="1"
-                                        android:text="Edit"
-                                        android:textSize="12sp"
-                                        app:backgroundTint="#E3F2FD"
-                                        app:cornerRadius="8dp"
-                                        app:strokeColor="#2196F3"
-                                        app:strokeWidth="1dp"
-                                        android:textColor="#2196F3"
-                                        android:layout_marginEnd="8dp"/>
+<!--                                    <com.google.android.material.button.MaterialButton-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="36dp"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="Edit"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        app:backgroundTint="#E3F2FD"-->
+<!--                                        app:cornerRadius="8dp"-->
+<!--                                        app:strokeColor="#2196F3"-->
+<!--                                        app:strokeWidth="1dp"-->
+<!--                                        android:textColor="#2196F3"-->
+<!--                                        android:layout_marginEnd="8dp"/>-->
 
-                                    <com.google.android.material.button.MaterialButton
-                                        android:layout_width="0dp"
-                                        android:layout_height="36dp"
-                                        android:layout_weight="1"
-                                        android:text="Mark Reserved"
-                                        android:textSize="12sp"
-                                        app:backgroundTint="#4CAF50"
-                                        app:cornerRadius="8dp"
-                                        android:textColor="#FFFFFF"/>
+<!--                                    <com.google.android.material.button.MaterialButton-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="36dp"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="Mark Reserved"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        app:backgroundTint="#4CAF50"-->
+<!--                                        app:cornerRadius="8dp"-->
+<!--                                        android:textColor="#FFFFFF"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                            </LinearLayout>
+<!--                            </LinearLayout>-->
 
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+<!--                        </LinearLayout>-->
+<!--                    </androidx.cardview.widget.CardView>-->
 
                     <!-- Listing 2: Prepared Meals -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#FFFFFF"
-                        android:layout_marginBottom="16dp">
+<!--                    <androidx.cardview.widget.CardView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        app:cardCornerRadius="12dp"-->
+<!--                        app:cardElevation="2dp"-->
+<!--                        app:cardBackgroundColor="#FFFFFF"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="16dp">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="horizontal"-->
+<!--                            android:padding="16dp">-->
 
-                            <!-- Food Image or Placeholder -->
-                            <androidx.cardview.widget.CardView
-                                android:layout_width="80dp"
-                                android:layout_height="80dp"
-                                app:cardCornerRadius="8dp"
-                                app:cardElevation="0dp"
-                                app:cardBackgroundColor="#F5F5F5"
-                                android:layout_marginEnd="16dp">
+<!--                            &lt;!&ndash; Food Image or Placeholder &ndash;&gt;-->
+<!--                            <androidx.cardview.widget.CardView-->
+<!--                                android:layout_width="80dp"-->
+<!--                                android:layout_height="80dp"-->
+<!--                                app:cardCornerRadius="8dp"-->
+<!--                                app:cardElevation="0dp"-->
+<!--                                app:cardBackgroundColor="#F5F5F5"-->
+<!--                                android:layout_marginEnd="16dp">-->
 
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:orientation="vertical"
-                                    android:gravity="center">
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="match_parent"-->
+<!--                                    android:orientation="vertical"-->
+<!--                                    android:gravity="center">-->
 
-                                    <ImageView
-                                        android:id="@+id/ivFood2"
-                                        android:layout_width="48dp"
-                                        android:layout_height="48dp"
-                                        android:src="@drawable/ic_meal"
-                                        app:tint="#4CAF50"/>
+<!--                                    <ImageView-->
+<!--                                        android:id="@+id/ivFood2"-->
+<!--                                        android:layout_width="48dp"-->
+<!--                                        android:layout_height="48dp"-->
+<!--                                        android:src="@drawable/ic_meal"-->
+<!--                                        app:tint="#4CAF50"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="No Image"
-                                        android:textSize="10sp"
-                                        android:textColor="#666666"
-                                        android:layout_marginTop="4dp"
-                                        android:visibility="gone"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="No Image"-->
+<!--                                        android:textSize="10sp"-->
+<!--                                        android:textColor="#666666"-->
+<!--                                        android:layout_marginTop="4dp"-->
+<!--                                        android:visibility="gone"/>-->
 
-                                </LinearLayout>
-                            </androidx.cardview.widget.CardView>
+<!--                                </LinearLayout>-->
+<!--                            </androidx.cardview.widget.CardView>-->
 
-                            <!-- Food Details -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_weight="1">
+<!--                            &lt;!&ndash; Food Details &ndash;&gt;-->
+<!--                            <LinearLayout-->
+<!--                                android:layout_width="0dp"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:orientation="vertical"-->
+<!--                                android:layout_weight="1">-->
 
-                                <!-- Title and Status -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical"
-                                    android:layout_marginBottom="8dp">
+<!--                                &lt;!&ndash; Title and Status &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:gravity="center_vertical"-->
+<!--                                    android:layout_marginBottom="8dp">-->
 
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="Prepared Meals - Pasta &amp; Sauce"
-                                        android:textSize="16sp"
-                                        android:textColor="#333333"
-                                        android:textStyle="bold"
-                                        android:maxLines="1"
-                                        android:ellipsize="end"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="Prepared Meals - Pasta &amp; Sauce"-->
+<!--                                        android:textSize="16sp"-->
+<!--                                        android:textColor="#333333"-->
+<!--                                        android:textStyle="bold"-->
+<!--                                        android:maxLines="1"-->
+<!--                                        android:ellipsize="end"/>-->
 
-                                    <TextView
-                                        android:id="@+id/tvStatus2"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Complete"
-                                        android:textSize="12sp"
-                                        android:textColor="#2196F3"
-                                        android:textStyle="bold"
-                                        android:background="@drawable/status_complete_bg"
-                                        android:paddingHorizontal="8dp"
-                                        android:paddingVertical="4dp"/>
+<!--                                    <TextView-->
+<!--                                        android:id="@+id/tvStatus2"-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Complete"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#2196F3"-->
+<!--                                        android:textStyle="bold"-->
+<!--                                        android:background="@drawable/status_complete_bg"-->
+<!--                                        android:paddingHorizontal="8dp"-->
+<!--                                        android:paddingVertical="4dp"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                                <!-- Food Type and Quantity -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Prepared Food • 15 portions"
-                                    android:textSize="14sp"
-                                    android:textColor="#666666"
-                                    android:layout_marginBottom="8dp"/>
+<!--                                &lt;!&ndash; Food Type and Quantity &ndash;&gt;-->
+<!--                                <TextView-->
+<!--                                    android:layout_width="wrap_content"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:text="Prepared Food • 15 portions"-->
+<!--                                    android:textSize="14sp"-->
+<!--                                    android:textColor="#666666"-->
+<!--                                    android:layout_marginBottom="8dp"/>-->
 
-                                <!-- Expiry and Pickup -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:layout_marginBottom="8dp">
+<!--                                &lt;!&ndash; Expiry and Pickup &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:layout_marginBottom="8dp">-->
 
-                                    <ImageView
-                                        android:layout_width="16dp"
-                                        android:layout_height="16dp"
-                                        android:src="@drawable/ic_calendar"
-                                        app:tint="#FF9800"
-                                        android:layout_marginEnd="4dp"/>
+<!--                                    <ImageView-->
+<!--                                        android:layout_width="16dp"-->
+<!--                                        android:layout_height="16dp"-->
+<!--                                        android:src="@drawable/ic_calendar"-->
+<!--                                        app:tint="#FF9800"-->
+<!--                                        android:layout_marginEnd="4dp"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Expiry: 2025-12-16"
-                                        android:textSize="12sp"
-                                        android:textColor="#666666"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Expiry: 2025-12-16"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#666666"/>-->
 
-                                    <View
-                                        android:layout_width="0dp"
-                                        android:layout_height="0dp"
-                                        android:layout_weight="1"/>
+<!--                                    <View-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="0dp"-->
+<!--                                        android:layout_weight="1"/>-->
 
-                                    <ImageView
-                                        android:layout_width="16dp"
-                                        android:layout_height="16dp"
-                                        android:src="@drawable/ic_time"
-                                        app:tint="#2196F3"
-                                        android:layout_marginEnd="4dp"/>
+<!--                                    <ImageView-->
+<!--                                        android:layout_width="16dp"-->
+<!--                                        android:layout_height="16dp"-->
+<!--                                        android:src="@drawable/ic_time"-->
+<!--                                        app:tint="#2196F3"-->
+<!--                                        android:layout_marginEnd="4dp"/>-->
 
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Pickup: 20:00 - 21:30"
-                                        android:textSize="12sp"
-                                        android:textColor="#666666"/>
+<!--                                    <TextView-->
+<!--                                        android:layout_width="wrap_content"-->
+<!--                                        android:layout_height="wrap_content"-->
+<!--                                        android:text="Pickup: 20:00 - 21:30"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        android:textColor="#666666"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                                <!-- Action Buttons -->
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical">
+<!--                                &lt;!&ndash; Action Buttons &ndash;&gt;-->
+<!--                                <LinearLayout-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:orientation="horizontal"-->
+<!--                                    android:gravity="center_vertical">-->
 
-                                    <com.google.android.material.button.MaterialButton
-                                        android:layout_width="0dp"
-                                        android:layout_height="36dp"
-                                        android:layout_weight="1"
-                                        android:text="View Details"
-                                        android:textSize="12sp"
-                                        app:backgroundTint="#E3F2FD"
-                                        app:cornerRadius="8dp"
-                                        app:strokeColor="#2196F3"
-                                        app:strokeWidth="1dp"
-                                        android:textColor="#2196F3"
-                                        android:layout_marginEnd="8dp"/>
+<!--                                    <com.google.android.material.button.MaterialButton-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="36dp"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="View Details"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        app:backgroundTint="#E3F2FD"-->
+<!--                                        app:cornerRadius="8dp"-->
+<!--                                        app:strokeColor="#2196F3"-->
+<!--                                        app:strokeWidth="1dp"-->
+<!--                                        android:textColor="#2196F3"-->
+<!--                                        android:layout_marginEnd="8dp"/>-->
 
-                                    <com.google.android.material.button.MaterialButton
-                                        android:layout_width="0dp"
-                                        android:layout_height="36dp"
-                                        android:layout_weight="1"
-                                        android:text="Re-list"
-                                        android:textSize="12sp"
-                                        app:backgroundTint="#4CAF50"
-                                        app:cornerRadius="8dp"
-                                        android:textColor="#FFFFFF"/>
+<!--                                    <com.google.android.material.button.MaterialButton-->
+<!--                                        android:layout_width="0dp"-->
+<!--                                        android:layout_height="36dp"-->
+<!--                                        android:layout_weight="1"-->
+<!--                                        android:text="Re-list"-->
+<!--                                        android:textSize="12sp"-->
+<!--                                        app:backgroundTint="#4CAF50"-->
+<!--                                        app:cornerRadius="8dp"-->
+<!--                                        android:textColor="#FFFFFF"/>-->
 
-                                </LinearLayout>
+<!--                                </LinearLayout>-->
 
-                            </LinearLayout>
+<!--                            </LinearLayout>-->
 
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+<!--                        </LinearLayout>-->
+<!--                    </androidx.cardview.widget.CardView>-->
 
                 </LinearLayout>
 

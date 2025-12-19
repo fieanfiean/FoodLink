@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:paddingTop="24dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -50,7 +51,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:clipToPadding="false"
-        android:paddingBottom="72dp">
+        android:paddingBottom="64dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -133,7 +134,7 @@
                             android:id="@+id/etQuantity"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="e.g., 5 kg or 20 portions"
+                            android:hint="e.g., 5 kg"
                             android:textSize="14sp"
                             android:textColor="#333333"
                             android:maxLines="1"/>
@@ -564,5 +565,18 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF"
+        app:menu="@menu/bottom_nav"
+        app:itemIconTint="@color/bottom_nav_colors"
+        app:itemTextColor="@color/bottom_nav_colors"
+        app:labelVisibilityMode="labeled"
+        android:elevation="8dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

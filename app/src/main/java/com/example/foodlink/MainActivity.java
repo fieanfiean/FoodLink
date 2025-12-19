@@ -1,20 +1,33 @@
 package com.example.foodlink;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
     private EditText etEmail, etPassword;
     private Button btnSignIn;
     private TextView tvForgotPassword, tvSignUp;
@@ -26,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            FirebaseApp.initializeApp(this);
+            mAuth = FirebaseAuth.getInstance();
+        } catch (Exception e) {
+            Toast.makeText(this, "Firebase initialization failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            // You might want to proceed without Firebase or exit gracefully
+            finish();
+            return;
+        }
+
         // Initialize views
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -34,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         tvSignUp = findViewById(R.id.tvSignUp);
         cardSeller = findViewById(R.id.cardSeller);
         cardCharity = findViewById(R.id.cardCharity);
+
+        mAuth = FirebaseAuth.getInstance();
 
         // Set initial state (no selection)
         resetCardSelection();
@@ -49,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Set click listeners for buttons
         btnSignIn.setOnClickListener(v -> {
-            String email = etEmail.getText().toString();
-            String password = etPassword.getText().toString();
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
 
             // Validate user type selection
             if (selectedUserType.isEmpty()) {
@@ -58,14 +83,25 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Validate email and password
+            // Validate email
             if (email.isEmpty()) {
                 etEmail.setError("Email is required");
                 return;
             }
 
+            if (!isValidEmail(email)) {
+                etEmail.setError("Please enter a valid email address");
+                return;
+            }
+
+            // Validate password
             if (password.isEmpty()) {
                 etPassword.setError("Password is required");
+                return;
+            }
+
+            if (password.length() < 6) {
+                etPassword.setError("Password must be at least 6 characters");
                 return;
             }
 
@@ -95,6 +131,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Alternative: Make only "Sign Up" part clickable using SpannableString
         makeSignUpClickable();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            currentUser.reload();
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        // Android's built-in email pattern matching
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private void selectUserType(String type) {
@@ -134,14 +185,77 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performLogin(String email, String password, String userType) {
-        // Implement your login logic here
-        Toast.makeText(this,
-                "Login as " + userType + " with email: " + email,
-                Toast.LENGTH_SHORT).show();
+        // Show loading indicator (optional)
+        // ProgressDialog progressDialog = new ProgressDialog(this);
+        // progressDialog.setMessage("Logging in...");
+        // progressDialog.show();
 
-        // Example: You would typically call an API here
-        // For now, just show a toast
-        if(userType.equals("seller") ) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        // progressDialog.dismiss(); // If using ProgressDialog
+
+                        if (task.isSuccessful()) {
+                            // Sign in success
+                            Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            // Check if email is verified (important for security)
+                            if (user != null && user.isEmailVerified()) {
+                                // User is verified, navigate to appropriate dashboard
+                                navigateToDashboard(userType);
+                            } else if (user != null) {
+                                // Email not verified
+                                Toast.makeText(MainActivity.this,
+                                        "Please verify your email first. Check your inbox.",
+                                        Toast.LENGTH_LONG).show();
+
+                                // Optionally resend verification email
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(emailTask -> {
+                                            if (emailTask.isSuccessful()) {
+                                                Toast.makeText(MainActivity.this,
+                                                        "Verification email sent!",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+
+                                // Sign out until email is verified
+                                mAuth.signOut();
+                            }
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+
+                            // User-friendly error messages
+                            String errorMessage = "Login failed";
+                            if (task.getException() != null) {
+                                String error = task.getException().getMessage();
+                                if (error.contains("invalid credential") || error.contains("password is invalid")) {
+                                    errorMessage = "Invalid email or password";
+                                } else if (error.contains("no user record")) {
+                                    errorMessage = "No account found with this email";
+                                } else if (error.contains("badly formatted")) {
+                                    errorMessage = "Invalid email format";
+                                } else {
+                                    errorMessage = error;
+                                }
+                            }
+
+                            Toast.makeText(MainActivity.this, errorMessage, // ✅ Fixed: Use MainActivity.this
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void navigateToDashboard(String userType) {
+        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+
+        // TODO: Check user type in Firestore to verify they're logging in as the correct type
+
+        if (userType.equals("seller")) {
             Intent intent = new Intent(this, SellerDashboardActivity.class);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             startActivity(intent);

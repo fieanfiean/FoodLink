@@ -4,19 +4,26 @@ package com.example.foodlink;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.foodlink.Profile;
 import com.example.foodlink.SessionManager;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private TextView tvProfileName, tvUserType, tvEmail, tvPhone, tvAddress;
     private TextView tvFoodSaved, tvDonationsMade, tvCo2Reduced, tvCharitiesHelped;
 
+    private BottomNavigationView bottomNavigation;
     private Profile userProfile;
     private SessionManager sessionManager;
 
@@ -34,12 +41,13 @@ public class ProfileActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
         initViews();
         setupClickListeners();
+        setupBottomNavigation();
         loadProfileData();
     }
 
     private void initViews() {
         // Back button
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+//        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         // Profile info views
         tvProfileName = findViewById(R.id.tvProfileName);
@@ -53,6 +61,9 @@ public class ProfileActivity extends AppCompatActivity {
         tvDonationsMade = findViewById(R.id.tvDonationsMade);
         tvCo2Reduced = findViewById(R.id.tvCo2Reduced);
         tvCharitiesHelped = findViewById(R.id.tvCharitiesHelped);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+
     }
 
     private void setupClickListeners() {
@@ -80,6 +91,44 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.btnLogout).setOnClickListener(v -> {
             showLogoutConfirmation();
         });
+    }
+
+    private void setupBottomNavigation() {
+        // Clear existing menu items
+        bottomNavigation.getMenu().clear();
+
+        // Add only the items you want for seller
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "Dashboard")
+                .setIcon(R.drawable.ic_dashboard);
+
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_add, 2, "Add")
+                .setIcon(R.drawable.ic_add);
+
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 3, "Profile")
+                .setIcon(R.drawable.ic_profile);
+
+        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.nav_dashboard) {
+                    navigateToDashboard();
+                    return true;
+                }
+                else if (itemId == R.id.nav_add) {
+                    navigateToAddListing();
+                    return true;
+                }
+                else if (itemId == R.id.nav_profile) {
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        // Set dashboard as selected
+        bottomNavigation.setSelectedItemId(R.id.nav_profile);
     }
 
     private void loadProfileData() {
@@ -160,13 +209,27 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void navigateToDashboard() {
+        Toast.makeText(this, "Navigate to Dashboard", Toast.LENGTH_SHORT).show();
+        bottomNavigation.setSelectedItemId(R.id.nav_add);
+        Intent intent = new Intent(this, SellerDashboardActivity.class);
+        startActivity(intent);
+        finish();
+    }
+    private void navigateToAddListing() {
+        Toast.makeText(this, "Navigate to Add Listing", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, AddNewFoodListingActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void logout() {
         // Clear session
-        sessionManager.logout();
+//        sessionManager.logout();
 
         // Navigate to login screen
         Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
 
