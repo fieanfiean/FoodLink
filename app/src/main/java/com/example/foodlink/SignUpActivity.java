@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -129,8 +131,6 @@ public class SignUpActivity extends AppCompatActivity {
             tvNameLabel.setText("Organization Name *");
             etName.setHint("e.g., Hope Community Kitchen");
         }
-
-//        updateCreateButtonState();
     }
 
     private void setupTextWatchers() {
@@ -143,7 +143,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-//                updateCreateButtonState();
+                // You can add password strength indicator updates here if needed
             }
         };
 
@@ -155,11 +155,70 @@ public class SignUpActivity extends AppCompatActivity {
         etConfirmPassword.addTextChangedListener(textWatcher);
     }
 
-//    private void updateCreateButtonState() {
-//        boolean isFormValid = isFormValid();
-//        btnCreateAccount.setEnabled(isFormValid);
-//        btnCreateAccount.setAlpha(isFormValid ? 1.0f : 0.5f);
-//    }
+    /**
+     * Method to check password strength
+     * Returns a strength level from 0 to 4
+     * 0: Very Weak, 1: Weak, 2: Fair, 3: Good, 4: Strong
+     */
+    private int checkPasswordStrength(String password) {
+        int strengthScore = 0;
+
+        // Check password length
+        if (password.length() >= 8) {
+            strengthScore++;
+        }
+
+        // Check for uppercase letters
+        if (Pattern.compile("[A-Z]").matcher(password).find()) {
+            strengthScore++;
+        }
+
+        // Check for lowercase letters
+        if (Pattern.compile("[a-z]").matcher(password).find()) {
+            strengthScore++;
+        }
+
+        // Check for numbers
+        if (Pattern.compile("[0-9]").matcher(password).find()) {
+            strengthScore++;
+        }
+
+        // Check for special characters
+        if (Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]").matcher(password).find()) {
+            strengthScore++;
+        }
+
+        // Cap the score at 4 for consistency
+        return Math.min(strengthScore, 4);
+    }
+
+    /**
+     * Returns a descriptive string for the password strength level
+     */
+    private String getPasswordStrengthDescription(int strengthLevel) {
+        switch (strengthLevel) {
+            case 0:
+            case 1:
+                return "very_weak";
+            case 2:
+                return "weak";
+            case 3:
+                return "fair";
+            case 4:
+                return "strong";
+            case 5:
+                return "very_strong";
+            default:
+                return "very_weak";
+        }
+    }
+
+    /**
+     * Returns a numeric rating from 1-5 for password strength
+     */
+    private int getPasswordStrengthRating(int strengthLevel) {
+        return Math.min(strengthLevel + 1, 5);
+    }
 
     private boolean isFormValid() {
         return !selectedRole.isEmpty() &&
@@ -191,9 +250,22 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             etEmail.setError("Invalid email format");
             return;
+        }
+
+        // Check password strength
+        int passwordStrengthLevel = checkPasswordStrength(password);
+        String passwordStrengthDescription = getPasswordStrengthDescription(passwordStrengthLevel);
+        int passwordStrengthRating = getPasswordStrengthRating(passwordStrengthLevel);
+
+        // Show password strength feedback (optional)
+        if (passwordStrengthRating <= 2) {
+            Toast.makeText(this, "Your password is weak. Consider adding uppercase letters, numbers, or special characters.",
+                    Toast.LENGTH_LONG).show();
+            // You can proceed anyway or require stronger password
+            // For now, we'll just warn but allow registration
         }
 
         // Show loading
@@ -219,6 +291,12 @@ public class SignUpActivity extends AppCompatActivity {
                             userData.put("phone", phone);
                             userData.put("address", address);
 
+                            // Password strength information
+                            userData.put("password_strength_level", passwordStrengthLevel);
+                            userData.put("password_strength_description", passwordStrengthDescription);
+                            userData.put("password_strength_rating", passwordStrengthRating);
+                            userData.put("password_last_updated", System.currentTimeMillis());
+
                             // Role-specific fields
                             if (selectedRole.equals("seller")) {
                                 userData.put("business_name", name); // Using name as business name
@@ -233,7 +311,6 @@ public class SignUpActivity extends AppCompatActivity {
                             }
 
                             // Additional metadata
-//                            userData.put("is_email_verified", false);
                             userData.put("created_at", System.currentTimeMillis());
                             userData.put("last_login", System.currentTimeMillis());
                             userData.put("is_active", true);
@@ -246,10 +323,6 @@ public class SignUpActivity extends AppCompatActivity {
                                 userData.put("co2_reduced", 0.0);
                                 userData.put("charities_helped",0);
                             }
-//                            else if (selectedRole.equals("charity")) {
-//                                userData.put("total_reservations", 0);
-//                                userData.put("total_received", 0);
-//                            }
 
                             // Save user data to Firestore 'users' collection
                             db.collection("users")

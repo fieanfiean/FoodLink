@@ -50,4 +50,11 @@
     <color name="green_light">#E8F5E9</color>
     <color name="orange_light">#FFF3E0</color>
     <color name="blue_light">#E3F2FD</color>
+
+    <color name="password_very_weak">#FF4444</color> <!-- Red -->
+    <color name="password_weak">#FF9800</color>     <!-- Orange -->
+    <color name="password_fair">#FFC107</color>     <!-- Yellow -->
+    <color name="password_good">#8BC34A</color>     <!-- Light Green -->
+    <color name="password_strong">#4CAF50</color>   <!-- Green -->
+    <color name="password_very_strong">#2E7D32</color> <!-- Dark Green -->
 </resources>

@@ -182,7 +182,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
 
         btnCancel.setOnClickListener(v -> {
             if (hasUnsavedChanges()) {
-                showUnsavedChangesDialog();
+                showUnsavedChangesDialog(" ");
             } else {
                 finish();
             }
@@ -205,12 +205,22 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_dashboard) {
-                    navigateToDashboard();
+                    if (hasUnsavedChanges()) {
+                        showUnsavedChangesDialog(" ");
+                    } else {
+                        navigateToDashboard();
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                    }
                     return true;
                 } else if (itemId == R.id.nav_add) {
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    navigateToProfile();
+                    if (hasUnsavedChanges()) {
+                        showUnsavedChangesDialog("Profile");
+                    } else {
+                        navigateToProfile();
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                    }
                     return true;
                 }
                 return false;
@@ -713,7 +723,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
     private boolean hasUnsavedChanges() {
         return !etFoodName.getText().toString().isEmpty() ||
                 !etQuantity.getText().toString().isEmpty() ||
-                !actvCategory.getText().toString().equals("Vegetables") ||
+                !actvCategory.getText().toString().equals("All") ||
                 !etExpiryDate.getText().toString().isEmpty() ||
                 !etStartTime.getText().toString().isEmpty() ||
                 !etEndTime.getText().toString().isEmpty() ||
@@ -721,11 +731,17 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
                 ivFoodImage.getVisibility() == View.VISIBLE;
     }
 
-    private void showUnsavedChangesDialog() {
+    private void showUnsavedChangesDialog(String page) {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
         builder.setTitle("Unsaved Changes");
         builder.setMessage("You have unsaved changes. Are you sure you want to discard them?");
-        builder.setPositiveButton("Discard", (dialog, which) -> navigateToDashboard());
+        builder.setPositiveButton("Discard", (dialog, which) -> {
+            if(page == "Profile"){
+                navigateToProfile();
+            }else{
+                navigateToDashboard();
+            }
+        });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         builder.create().show();
     }
@@ -751,7 +767,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
             @Override
             public void handleOnBackPressed() {
                 if (hasUnsavedChanges()) {
-                    showUnsavedChangesDialog();
+                    showUnsavedChangesDialog(" ");
                 } else {
                     navigateToDashboard();
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
