@@ -426,7 +426,7 @@ public class PrivacySecurityActivity extends AppCompatActivity {
                         loadPasswordStrengthFromFirestore();
 
                         // Navigate back to ProfileActivity
-                        navigateToProfile();
+                        navigateToLogin();
                     }
                 })
                 .setCancelable(false)
@@ -578,9 +578,7 @@ public class PrivacySecurityActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         // Navigate to login screen
                         mAuth.signOut();
-                        Intent intent = new Intent(PrivacySecurityActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        navigateToLogin();
                     }
                 })
                 .setCancelable(false)
