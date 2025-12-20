@@ -99,7 +99,7 @@
 
                         <!-- Profile Image -->
                         <androidx.cardview.widget.CardView
-                            android:id="@+id/ivProfileImage"
+                            android:id="@+id/cardProfileImage"
                             android:layout_width="80dp"
                             android:layout_height="80dp"
                             app:cardCornerRadius="40dp"
@@ -332,219 +332,219 @@
             </androidx.cardview.widget.CardView>
 
             <!-- Additional Settings Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                app:cardCornerRadius="12dp"-->
+<!--                app:cardElevation="2dp"-->
+<!--                app:cardBackgroundColor="#FFFFFF"-->
+<!--                android:layout_marginBottom="16dp">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:padding="20dp">-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Additional Settings"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Additional Settings"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="#333333"-->
+<!--                        android:textStyle="bold"-->
+<!--                        android:layout_marginBottom="16dp"/>-->
 
-                    <!-- Email Notifications -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+<!--                    &lt;!&ndash; Email Notifications &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_weight="1">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:layout_weight="1">-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Email Notifications"
-                                android:textSize="14sp"
-                                android:textColor="#333333"
-                                android:textStyle="bold"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Email Notifications"-->
+<!--                                android:textSize="14sp"-->
+<!--                                android:textColor="#333333"-->
+<!--                                android:textStyle="bold"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Receive updates about new listings and reservations"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Receive updates about new listings and reservations"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/switchEmailNotifications"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"/>
+<!--                        <androidx.appcompat.widget.SwitchCompat-->
+<!--                            android:id="@+id/switchEmailNotifications"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:checked="true"/>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                    <!-- SMS Alerts -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+<!--                    &lt;!&ndash; SMS Alerts &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_weight="1">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:layout_weight="1">-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="SMS Alerts"
-                                android:textSize="14sp"
-                                android:textColor="#333333"
-                                android:textStyle="bold"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="SMS Alerts"-->
+<!--                                android:textSize="14sp"-->
+<!--                                android:textColor="#333333"-->
+<!--                                android:textStyle="bold"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Get text messages for urgent updates"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Get text messages for urgent updates"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/switchSmsAlerts"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"/>
+<!--                        <androidx.appcompat.widget.SwitchCompat-->
+<!--                            android:id="@+id/switchSmsAlerts"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:checked="true"/>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                    <!-- Public Profile -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+<!--                    &lt;!&ndash; Public Profile &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal">-->
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_weight="1">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:layout_weight="1">-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Public Profile"
-                                android:textSize="14sp"
-                                android:textColor="#333333"
-                                android:textStyle="bold"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Public Profile"-->
+<!--                                android:textSize="14sp"-->
+<!--                                android:textColor="#333333"-->
+<!--                                android:textStyle="bold"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Allow others to see your profile and impact stats"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Allow others to see your profile and impact stats"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/switchPublicProfile"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"/>
+<!--                        <androidx.appcompat.widget.SwitchCompat-->
+<!--                            android:id="@+id/switchPublicProfile"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:checked="true"/>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+<!--                </LinearLayout>-->
+<!--            </androidx.cardview.widget.CardView>-->
 
             <!-- Security Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                app:cardCornerRadius="12dp"-->
+<!--                app:cardElevation="2dp"-->
+<!--                app:cardBackgroundColor="#FFFFFF"-->
+<!--                android:layout_marginBottom="16dp">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:padding="20dp">-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Security"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Security"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="#333333"-->
+<!--                        android:textStyle="bold"-->
+<!--                        android:layout_marginBottom="16dp"/>-->
 
-                    <!-- Password Info -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+<!--                    &lt;!&ndash; Password Info &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_weight="1">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:layout_weight="1">-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Password"
-                                android:textSize="14sp"
-                                android:textColor="#333333"
-                                android:textStyle="bold"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Password"-->
+<!--                                android:textSize="14sp"-->
+<!--                                android:textColor="#333333"-->
+<!--                                android:textStyle="bold"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Last changed 30 days ago"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Last changed 30 days ago"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnChangePassword"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="Change Password"
-                            android:textSize="14sp"
-                            app:backgroundTint="#E3F2FD"
-                            app:cornerRadius="8dp"
-                            app:strokeColor="#2196F3"
-                            app:strokeWidth="1dp"
-                            android:textColor="#2196F3"/>
+<!--                        <com.google.android.material.button.MaterialButton-->
+<!--                            android:id="@+id/btnChangePassword"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="40dp"-->
+<!--                            android:text="Change Password"-->
+<!--                            android:textSize="14sp"-->
+<!--                            app:backgroundTint="#E3F2FD"-->
+<!--                            app:cornerRadius="8dp"-->
+<!--                            app:strokeColor="#2196F3"-->
+<!--                            app:strokeWidth="1dp"-->
+<!--                            android:textColor="#2196F3"/>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+<!--                </LinearLayout>-->
+<!--            </androidx.cardview.widget.CardView>-->
 
             <!-- Action Buttons -->
             <LinearLayout

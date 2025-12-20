@@ -126,6 +126,7 @@
                             android:layout_marginEnd="16dp">
 
                             <ImageView
+                                android:id="@+id/imageViewProfile"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:src="@drawable/ic_profile"
@@ -344,55 +345,55 @@
                         android:layout_marginBottom="16dp"/>
 
                     <!-- Notification Preferences -->
-                    <LinearLayout
-                        android:id="@+id/btnNotificationSettings"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:paddingVertical="12dp"
-                        android:layout_marginBottom="8dp">
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/btnNotificationSettings"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:background="?attr/selectableItemBackground"-->
+<!--                        android:clickable="true"-->
+<!--                        android:focusable="true"-->
+<!--                        android:paddingVertical="12dp"-->
+<!--                        android:layout_marginBottom="8dp">-->
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_notification"
-                            app:tint="#666666"
-                            android:layout_marginEnd="16dp"/>
+<!--                        <ImageView-->
+<!--                            android:layout_width="24dp"-->
+<!--                            android:layout_height="24dp"-->
+<!--                            android:src="@drawable/ic_notification"-->
+<!--                            app:tint="#666666"-->
+<!--                            android:layout_marginEnd="16dp"/>-->
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_weight="1">
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:layout_weight="1">-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Notification Preferences"
-                                android:textSize="14sp"
-                                android:textColor="#333333"
-                                android:textStyle="bold"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Notification Preferences"-->
+<!--                                android:textSize="14sp"-->
+<!--                                android:textColor="#333333"-->
+<!--                                android:textStyle="bold"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Manage your notification settings"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:layout_marginTop="2dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Manage your notification settings"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:layout_marginTop="2dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_arrow_right"
-                            app:tint="#999999"/>
+<!--                        <ImageView-->
+<!--                            android:layout_width="16dp"-->
+<!--                            android:layout_height="16dp"-->
+<!--                            android:src="@drawable/ic_arrow_right"-->
+<!--                            app:tint="#999999"/>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
                     <!-- Divider -->
                     <View
@@ -513,176 +514,176 @@
             </androidx.cardview.widget.CardView>
 
             <!-- Sustainability Impact Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="32dp">
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                app:cardCornerRadius="12dp"-->
+<!--                app:cardElevation="2dp"-->
+<!--                app:cardBackgroundColor="#FFFFFF"-->
+<!--                android:layout_marginHorizontal="16dp"-->
+<!--                android:layout_marginBottom="32dp">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:padding="20dp">-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Your Sustainability Impact"
-                        android:textSize="16sp"
-                        android:textColor="#1B5E20"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="20dp"/>
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Your Sustainability Impact"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="#1B5E20"-->
+<!--                        android:textStyle="bold"-->
+<!--                        android:layout_marginBottom="20dp"/>-->
 
-                    <!-- Impact Metrics Grid -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+<!--                    &lt;!&ndash; Impact Metrics Grid &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginBottom="16dp">-->
 
-                        <!-- Food Saved -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/impact_metric_bg"
-                            android:padding="16dp"
-                            android:layout_marginEnd="8dp">
+<!--                        &lt;!&ndash; Food Saved &ndash;&gt;-->
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:gravity="center"-->
+<!--                            android:background="@drawable/impact_metric_bg"-->
+<!--                            android:padding="16dp"-->
+<!--                            android:layout_marginEnd="8dp">-->
 
-                            <TextView
-                                android:id="@+id/tvFoodSaved"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="127kg"
-                                android:textSize="20sp"
-                                android:textColor="#4CAF50"
-                                android:textStyle="bold"
-                                android:gravity="center"/>
+<!--                            <TextView-->
+<!--                                android:id="@+id/tvFoodSaved"-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="127kg"-->
+<!--                                android:textSize="20sp"-->
+<!--                                android:textColor="#4CAF50"-->
+<!--                                android:textStyle="bold"-->
+<!--                                android:gravity="center"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Food Saved"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:gravity="center"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Food Saved"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:gravity="center"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <!-- Donations Made -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/impact_metric_bg"
-                            android:padding="16dp"
-                            android:layout_marginStart="8dp">
+<!--                        &lt;!&ndash; Donations Made &ndash;&gt;-->
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:gravity="center"-->
+<!--                            android:background="@drawable/impact_metric_bg"-->
+<!--                            android:padding="16dp"-->
+<!--                            android:layout_marginStart="8dp">-->
 
-                            <TextView
-                                android:id="@+id/tvDonationsMade"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="42"
-                                android:textSize="20sp"
-                                android:textColor="#2196F3"
-                                android:textStyle="bold"
-                                android:gravity="center"/>
+<!--                            <TextView-->
+<!--                                android:id="@+id/tvDonationsMade"-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="42"-->
+<!--                                android:textSize="20sp"-->
+<!--                                android:textColor="#2196F3"-->
+<!--                                android:textStyle="bold"-->
+<!--                                android:gravity="center"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Donations Made"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:gravity="center"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Donations Made"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:gravity="center"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal">-->
 
-                        <!-- CO2 Reduced -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/impact_metric_bg"
-                            android:padding="16dp"
-                            android:layout_marginEnd="8dp">
+<!--                        &lt;!&ndash; CO2 Reduced &ndash;&gt;-->
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:gravity="center"-->
+<!--                            android:background="@drawable/impact_metric_bg"-->
+<!--                            android:padding="16dp"-->
+<!--                            android:layout_marginEnd="8dp">-->
 
-                            <TextView
-                                android:id="@+id/tvCo2Reduced"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="185kg"
-                                android:textSize="20sp"
-                                android:textColor="#FF9800"
-                                android:textStyle="bold"
-                                android:gravity="center"/>
+<!--                            <TextView-->
+<!--                                android:id="@+id/tvCo2Reduced"-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="185kg"-->
+<!--                                android:textSize="20sp"-->
+<!--                                android:textColor="#FF9800"-->
+<!--                                android:textStyle="bold"-->
+<!--                                android:gravity="center"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="CO₂ Reduced"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:gravity="center"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="CO₂ Reduced"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:gravity="center"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                        <!-- Charities Helped -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/impact_metric_bg"
-                            android:padding="16dp"
-                            android:layout_marginStart="8dp">
+<!--                        &lt;!&ndash; Charities Helped &ndash;&gt;-->
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:orientation="vertical"-->
+<!--                            android:gravity="center"-->
+<!--                            android:background="@drawable/impact_metric_bg"-->
+<!--                            android:padding="16dp"-->
+<!--                            android:layout_marginStart="8dp">-->
 
-                            <TextView
-                                android:id="@+id/tvCharitiesHelped"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="8"
-                                android:textSize="20sp"
-                                android:textColor="#9C27B0"
-                                android:textStyle="bold"
-                                android:gravity="center"/>
+<!--                            <TextView-->
+<!--                                android:id="@+id/tvCharitiesHelped"-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="8"-->
+<!--                                android:textSize="20sp"-->
+<!--                                android:textColor="#9C27B0"-->
+<!--                                android:textStyle="bold"-->
+<!--                                android:gravity="center"/>-->
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Charities Helped"
-                                android:textSize="12sp"
-                                android:textColor="#666666"
-                                android:gravity="center"
-                                android:layout_marginTop="4dp"/>
+<!--                            <TextView-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:text="Charities Helped"-->
+<!--                                android:textSize="12sp"-->
+<!--                                android:textColor="#666666"-->
+<!--                                android:gravity="center"-->
+<!--                                android:layout_marginTop="4dp"/>-->
 
-                        </LinearLayout>
+<!--                        </LinearLayout>-->
 
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
 
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+<!--                </LinearLayout>-->
+<!--            </androidx.cardview.widget.CardView>-->
 
             <!-- Logout Button -->
             <com.google.android.material.button.MaterialButton

@@ -4,6 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#4CAF50</color>
 
+    <color name="red">#FF0000</color>
 
     <!-- Background colors -->
     <color name="grey_600">#757575</color>
@@ -44,4 +45,9 @@
     <color name="green_500">#4CAF50</color>
     <color name="orange_500">#FF9800</color>
     <color name="blue_500">#2196F3</color>
+
+    <!-- Status card background colors -->
+    <color name="green_light">#E8F5E9</color>
+    <color name="orange_light">#FFF3E0</color>
+    <color name="blue_light">#E3F2FD</color>
 </resources>

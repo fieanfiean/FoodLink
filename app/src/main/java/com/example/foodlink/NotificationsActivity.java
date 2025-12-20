@@ -1,12 +1,15 @@
 // NotificationsActivity.java
 package com.example.foodlink;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import com.example.foodlink.Notification;
@@ -31,6 +34,7 @@ public class NotificationsActivity extends AppCompatActivity {
         initViews();
         setupClickListeners();
         loadNotifications();
+        setupBackPressHandler();
     }
 
     private void initViews() {
@@ -39,7 +43,23 @@ public class NotificationsActivity extends AppCompatActivity {
         tvUnreadCount = findViewById(R.id.tvUnreadCount);
         tvMarkAll = findViewById(R.id.tvMarkAll);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnBack).setOnClickListener(v -> navigateToDashboard());
+    }
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                navigateToDashboard();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        });
+    }
+    private void navigateToDashboard() {
+        Toast.makeText(this, "Navigate to Dashboard", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, SellerDashboardActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void setupClickListeners() {

@@ -59,4 +59,5 @@ public class Profile {
 
     public int getCharitiesHelped() { return charitiesHelped; }
     public void setCharitiesHelped(int charitiesHelped) { this.charitiesHelped = charitiesHelped; }
+
 }

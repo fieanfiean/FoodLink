@@ -502,7 +502,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
 
         // Get values from form
         String foodName = etFoodName.getText().toString().trim();
-        String quantity = etQuantity.getText().toString().trim();
+        String quantityStr = etQuantity.getText().toString().trim();
         String category = actvCategory.getText().toString().trim();
         String expiryDate = etExpiryDate.getText().toString().trim();
         String startTime = etStartTime.getText().toString().trim();
@@ -510,9 +510,36 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         String additionalDetails = etAdditionalDetails.getText().toString().trim();
 
         // Validate required fields
-        if (foodName.isEmpty() || quantity.isEmpty() || category.isEmpty() ||
+        if (foodName.isEmpty() || quantityStr.isEmpty() || category.isEmpty() ||
                 expiryDate.isEmpty() || startTime.isEmpty() || endTime.isEmpty()) {
             Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validate quantity is a valid number
+        double quantity = 0;
+        try {
+            quantity = Double.parseDouble(quantityStr);
+
+            // Check for reasonable values
+            if (quantity <= 0) {
+                Toast.makeText(this, "Quantity must be greater than 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (quantity > 1000) {
+                Toast.makeText(this, "Quantity seems too large. Please check.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check if it's a decimal number
+            if (quantity != Math.floor(quantity)) {
+                Log.d(TAG, "Decimal quantity detected: " + quantity);
+            }
+
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Please enter a valid number for quantity (e.g., 2, 2.5, 3.0)",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -588,11 +615,11 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         String listingId = "FDL" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // Call method to save everything (including Base64 string) to Firestore
-        saveFoodListingToFirestore(progressDialog, listingId, imageBase64, currentUser);
+        saveFoodListingToFirestore(progressDialog, listingId, imageBase64, currentUser,quantity);
     }
 
     private void saveFoodListingToFirestore(ProgressDialog progressDialog, String listingId,
-                                            String imageBase64, FirebaseUser currentUser) {
+                                            String imageBase64, FirebaseUser currentUser,double validatedQuantity) {
         // Get user data from Firestore
         db.collection("users")
                 .document(currentUser.getUid())
@@ -623,7 +650,7 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
                     // Create FoodListing object
                     FoodListing foodListing = new FoodListing();
                     foodListing.setFoodName(etFoodName.getText().toString().trim());
-                    foodListing.setQuantity(etQuantity.getText().toString().trim());
+                    foodListing.setQuantity(validatedQuantity);
                     foodListing.setCategory(actvCategory.getText().toString().trim());
                     foodListing.setExpiryDate(etExpiryDate.getText().toString().trim());
                     foodListing.setStartTime(etStartTime.getText().toString().trim());
@@ -734,9 +761,10 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
     }
 
     // FoodListing model class
+    // FoodListing model class
     public static class FoodListing {
         private String foodName;
-        private String quantity;
+        private double quantity; // CHANGE: String to double
         private String category;
         private String expiryDate;
         private String startTime;
@@ -753,15 +781,28 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         private String reservedBy;
         private long createdAt;
         private String imageUrl;
-
         private String imageBase64;
 
-
+        // Getters and setters
         public String getFoodName() { return foodName; }
         public void setFoodName(String foodName) { this.foodName = foodName; }
 
-        public String getQuantity() { return quantity; }
-        public void setQuantity(String quantity) { this.quantity = quantity; }
+        // CHANGE: Return double
+        public double getQuantity() { return quantity; }
+
+        // CHANGE: Parse String to double
+        public void setQuantity(String quantityStr) {
+            try {
+                this.quantity = Double.parseDouble(quantityStr);
+            } catch (NumberFormatException e) {
+                this.quantity = 0.0; // Default to 0 if invalid
+            }
+        }
+
+        // ADD: Direct double setter
+        public void setQuantity(double quantity) {
+            this.quantity = quantity;
+        }
 
         public String getCategory() { return category; }
         public void setCategory(String category) { this.category = category; }
@@ -830,11 +871,11 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         public String getImageBase64() { return imageBase64; }
         public void setImageBase64(String imageBase64) { this.imageBase64 = imageBase64; }
 
-        // Update toFirestoreMap() method to include Base64
+        // UPDATE toFirestoreMap() method - save quantity as Double
         public Map<String, Object> toFirestoreMap() {
             Map<String, Object> map = new HashMap<>();
             map.put("food_name", foodName);
-            map.put("quantity", quantity);
+            map.put("quantity", this.quantity); // CHANGE: Save as Double, not String!
             map.put("category", category);
             map.put("expiry_date", expiryDate);
             map.put("start_time", startTime);
@@ -856,10 +897,12 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
                 map.put("image_base64", imageBase64);
             }
 
-            // You can keep imageUrl for future if you switch to URLs
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 map.put("image_url", imageUrl);
             }
+
+            Log.d(TAG, "FoodListing toFirestoreMap - Quantity: " + this.quantity + " (type: " +
+                    (this.quantity == Math.floor(this.quantity) ? "whole number" : "decimal") + ")");
 
             return map;
         }

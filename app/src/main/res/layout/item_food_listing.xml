@@ -182,9 +182,9 @@
                     android:layout_width="0dp"
                     android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:text="Mark Reserved"
+                    android:text="Delete"
                     android:textSize="12sp"
-                    app:backgroundTint="#4CAF50"
+                    app:backgroundTint="@color/red"
                     app:cornerRadius="8dp"
                     android:textColor="#FFFFFF"/>
 

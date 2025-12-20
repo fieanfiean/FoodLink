@@ -7,184 +7,241 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import android.util.Base64;
+import java.io.ByteArrayOutputStream;
 
 public class EditProfileActivity extends AppCompatActivity {
 
     // UI Components
-    private ImageView btnBack;
     private ImageView imageViewProfile;
     private MaterialButton btnUploadPhoto;
     private TextInputEditText etBusinessName;
     private TextInputEditText etEmail;
     private TextInputEditText etPhone;
     private TextInputEditText etAddress;
-    private TextView tvAccountType;
-    private SwitchCompat switchEmailNotifications;
-    private SwitchCompat switchSmsAlerts;
-    private SwitchCompat switchPublicProfile;
-    private MaterialButton btnChangePassword;
     private MaterialButton btnCancel;
     private MaterialButton btnSaveChanges;
 
+    // Firebase
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private FirebaseUser currentUser;
+
     // Constants
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final String TAG = "EditProfileActivity";
 
-    // User data model (you can replace with your actual User class)
-    private UserProfile userProfile;
+    // User data
+    private String originalBusinessName = "";
+    private String originalEmail = "";
+    private String originalPhone = "";
+    private String originalAddress = "";
+
+    private String imageBase64 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_profile); // Make sure your XML file is named activity_edit_profile.xml
+        setContentView(R.layout.activity_edit_profile);
 
-        // Initialize UI Components
-        initViews();
+        // Initialize Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
-        // Load user data (you would replace this with actual data loading)
-        loadUserData();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Setup listeners
-        setupListeners();
-
-        // Setup toolbar
-        setupToolbar();
+        try {
+            initViews();
+            loadUserDataFromFirestore();
+            setupListeners();
+            setupBackPressHandler();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
+            Toast.makeText(this, "Error loading edit profile", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void initViews() {
-        // Toolbar and navigation
-        btnBack = findViewById(R.id.btnBack);
+        try {
+            View backButton = findViewById(R.id.btnBack);
+            if (backButton != null) {
+                backButton.setOnClickListener(v -> navigateToProfile());
+            }
 
-        // Profile section
-        imageViewProfile = findViewById(R.id.imageViewProfile);
-        btnUploadPhoto = findViewById(R.id.btnUploadPhoto);
+            View cardView = findViewById(R.id.ivProfileImage);
+            if (cardView != null) {
+                imageViewProfile = cardView.findViewById(R.id.imageViewProfile);
+            }
 
-        // Organization information
-        etBusinessName = findViewById(R.id.etBusinessName);
-        etEmail = findViewById(R.id.etEmail);
-        etPhone = findViewById(R.id.etPhone);
-        etAddress = findViewById(R.id.etAddress);
+            if (imageViewProfile == null) {
+                imageViewProfile = findViewById(R.id.imageViewProfile);
+            }
 
-        // Account type
-        tvAccountType = findViewById(R.id.tvAccountType);
+            btnUploadPhoto = findViewById(R.id.btnUploadPhoto);
+            etBusinessName = findViewById(R.id.etBusinessName);
+            etEmail = findViewById(R.id.etEmail);
+            etPhone = findViewById(R.id.etPhone);
+            etAddress = findViewById(R.id.etAddress);
+            btnCancel = findViewById(R.id.btnCancel);
+            btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
-        // Additional settings
-        switchEmailNotifications = findViewById(R.id.switchEmailNotifications);
-        switchSmsAlerts = findViewById(R.id.switchSmsAlerts);
-        switchPublicProfile = findViewById(R.id.switchPublicProfile);
-
-        // Security
-        btnChangePassword = findViewById(R.id.btnChangePassword);
-
-        // Action buttons
-        btnCancel = findViewById(R.id.btnCancel);
-        btnSaveChanges = findViewById(R.id.btnSaveChanges);
-    }
-
-    private void loadUserData() {
-        // TODO: Load actual user data from SharedPreferences, Database, or API
-        // For now, using dummy data
-        userProfile = new UserProfile();
-        userProfile.setBusinessName("Green Leaf Restaurant");
-        userProfile.setEmail("1@1");
-        userProfile.setPhone("+1 234 567 8900");
-        userProfile.setAddress("123 Eco Street, Sustainable City");
-        userProfile.setAccountType("Food Seller");
-        userProfile.setEmailNotifications(true);
-        userProfile.setSmsAlerts(true);
-        userProfile.setPublicProfile(true);
-
-        // Populate UI with user data
-        populateUserData();
-    }
-
-    private void populateUserData() {
-        if (userProfile != null) {
-            etBusinessName.setText(userProfile.getBusinessName());
-            etEmail.setText(userProfile.getEmail());
-            etPhone.setText(userProfile.getPhone());
-            etAddress.setText(userProfile.getAddress());
-            tvAccountType.setText(userProfile.getAccountType());
-            switchEmailNotifications.setChecked(userProfile.isEmailNotifications());
-            switchSmsAlerts.setChecked(userProfile.isSmsAlerts());
-            switchPublicProfile.setChecked(userProfile.isPublicProfile());
+        } catch (Exception e) {
+            Log.e(TAG, "Error in initViews: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize views", e);
         }
     }
 
-    private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
+    private void loadUserDataFromFirestore() {
+        String userId = currentUser.getUid();
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String businessName = documentSnapshot.getString("business_name");
+                        if (businessName == null || businessName.isEmpty()) {
+                            businessName = documentSnapshot.getString("full_name");
+                        }
+                        if (businessName == null || businessName.isEmpty()) {
+                            businessName = documentSnapshot.getString("name");
+                        }
+
+                        // ALWAYS show current Firebase Auth email in the field
+                        String currentAuthEmail = currentUser.getEmail();
+                        originalEmail = currentAuthEmail != null ? currentAuthEmail : "";
+
+                        // But load the stored email to detect changes
+                        String storedEmail = documentSnapshot.getString("email");
+
+                        String phone = documentSnapshot.getString("phone");
+                        String address = documentSnapshot.getString("address");
+
+                        // Store original values
+                        originalBusinessName = businessName != null ? businessName : "";
+                        originalPhone = phone != null ? phone : "";
+                        originalAddress = address != null ? address : "";
+
+                        // Populate UI
+                        etBusinessName.setText(originalBusinessName);
+                        etEmail.setText(originalEmail); // Show Auth email, not stored email
+                        etPhone.setText(originalPhone);
+                        etAddress.setText(originalAddress);
+
+                        String profileImageBase64 = documentSnapshot.getString("profile_image_base64");
+                        boolean hasProfileImage = Boolean.TRUE.equals(documentSnapshot.getBoolean("has_profile_image"));
+
+                        // Store original values
+                        originalBusinessName = businessName != null ? businessName : "";
+                        originalPhone = phone != null ? phone : "";
+                        originalAddress = address != null ? address : "";
+
+                        // Populate UI
+                        etBusinessName.setText(originalBusinessName);
+                        etEmail.setText(originalEmail); // Show Auth email, not stored email
+                        etPhone.setText(originalPhone);
+                        etAddress.setText(originalAddress);
+
+                        // ===== NEW CODE: DISPLAY PROFILE IMAGE IF EXISTS =====
+                        if (hasProfileImage && profileImageBase64 != null && !profileImageBase64.isEmpty()) {
+                            // Store the loaded image in instance variable
+                            imageBase64 = profileImageBase64;
+
+                            // Convert Base64 to Bitmap and display
+                            Bitmap profileBitmap = convertBase64ToBitmap(profileImageBase64);
+                            if (profileBitmap != null && imageViewProfile != null) {
+                                imageViewProfile.setImageBitmap(profileBitmap);
+                                Toast.makeText(this, "Profile image loaded", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // Set default profile image
+                            if (imageViewProfile != null) {
+                                imageViewProfile.setImageResource(R.drawable.ic_profile);
+                            }
+                        }
+
+                    } else {
+                        originalEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "";
+                        etEmail.setText(originalEmail);
+                        Toast.makeText(this, "Profile not found, creating new one", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading profile: " + e.getMessage());
+                    Toast.makeText(this, "Error loading profile", Toast.LENGTH_SHORT).show();
+                });
     }
 
+    private Bitmap convertBase64ToBitmap(String base64String) {
+        try {
+            // Decode Base64 to byte array
+            byte[] decodedBytes = Base64.decode(base64String, Base64.DEFAULT);
+
+            // Convert byte array to Bitmap
+            android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+            return android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting Base64 to Bitmap: " + e.getMessage());
+            return null;
+        }
+    }
     private void setupListeners() {
-        // Back button
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
+        try {
+            if (btnUploadPhoto != null) {
+                btnUploadPhoto.setOnClickListener(v -> openImageChooser());
             }
-        });
 
-        // Upload photo button
-        btnUploadPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openImageChooser();
+            if (btnCancel != null) {
+                btnCancel.setOnClickListener(v -> {
+                    if (hasUnsavedChanges()) {
+                        showUnsavedChangesDialog();
+                    } else {
+                        finish();
+                    }
+                });
             }
-        });
 
-        // Change password button
-        btnChangePassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to Change Password activity
-                Intent intent = new Intent(EditProfileActivity.this, ChangePasswordActivity.class);
-                startActivity(intent);
+            if (btnSaveChanges != null) {
+                btnSaveChanges.setOnClickListener(v -> saveProfileChanges());
             }
-        });
 
-        // Cancel button
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Check if there are unsaved changes
-                if (hasUnsavedChanges()) {
-                    showUnsavedChangesDialog();
-                } else {
-                    finish();
-                }
-            }
-        });
+            setupFormValidation();
 
-        // Save changes button
-        btnSaveChanges.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveProfileChanges();
-            }
-        });
-
-        // Form validation - Enable/Disable save button based on input validity
-        setupFormValidation();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in setupListeners: " + e.getMessage(), e);
+            Toast.makeText(this, "Error setting up listeners", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupFormValidation() {
@@ -205,49 +262,25 @@ public class EditProfileActivity extends AppCompatActivity {
         etEmail.addTextChangedListener(textWatcher);
         etPhone.addTextChangedListener(textWatcher);
         etAddress.addTextChangedListener(textWatcher);
-
-        // Also validate when switches change
-        CompoundButton.OnCheckedChangeListener switchListener = new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                validateForm();
-            }
-        };
-
-        switchEmailNotifications.setOnCheckedChangeListener(switchListener);
-        switchSmsAlerts.setOnCheckedChangeListener(switchListener);
-        switchPublicProfile.setOnCheckedChangeListener(switchListener);
+        validateForm();
     }
 
     private void validateForm() {
-        boolean isValid = true;
+        String businessName = etBusinessName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
 
-        // Check required fields
-        if (etBusinessName.getText().toString().trim().isEmpty()) {
-            isValid = false;
+        boolean isValid = !businessName.isEmpty() &&
+                !email.isEmpty() &&
+                !phone.isEmpty() &&
+                !address.isEmpty() &&
+                android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+
+        if (btnSaveChanges != null) {
+            btnSaveChanges.setEnabled(isValid);
+            btnSaveChanges.setAlpha(isValid ? 1.0f : 0.5f);
         }
-
-        if (etEmail.getText().toString().trim().isEmpty()) {
-            isValid = false;
-        } else if (!isValidEmail(etEmail.getText().toString().trim())) {
-            isValid = false;
-        }
-
-        if (etPhone.getText().toString().trim().isEmpty()) {
-            isValid = false;
-        }
-
-        if (etAddress.getText().toString().trim().isEmpty()) {
-            isValid = false;
-        }
-
-//        // Enable/disable save button based on validation
-//        btnSaveChanges.setEnabled(isValid);
-//        btnSaveChanges.setAlpha(isValid ? 1.0f : 0.5f);
-    }
-
-    private boolean isValidEmail(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private void openImageChooser() {
@@ -265,10 +298,18 @@ public class EditProfileActivity extends AppCompatActivity {
             Uri imageUri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                imageViewProfile.setImageBitmap(bitmap);
+                if (imageViewProfile != null) {
+                    imageViewProfile.setImageBitmap(bitmap);
+                    imageBase64 = convertBitmapToBase64(bitmap);
 
-                // TODO: Upload image to server and save URL
-                Toast.makeText(this, "Profile image updated", Toast.LENGTH_SHORT).show();
+                    if (imageBase64 != null && imageBase64.length() > 1000000) {
+                        Toast.makeText(this, "Image is too large. Please select a smaller image.", Toast.LENGTH_LONG).show();
+                        imageBase64 = null;
+                        imageViewProfile.setImageResource(R.drawable.ic_profile);
+                    } else if (imageBase64 != null) {
+                        Toast.makeText(this, "Profile image updated", Toast.LENGTH_SHORT).show();
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
@@ -276,56 +317,224 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    private String convertBitmapToBase64(Bitmap bitmap) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            boolean isCompressed = bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+
+            if (!isCompressed) {
+                Log.e(TAG, "Failed to compress bitmap");
+                return null;
+            }
+
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            String base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            byteArrayOutputStream.close();
+            return base64;
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting bitmap to Base64: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ==================== MAIN PROFILE SAVE LOGIC ====================
     private void saveProfileChanges() {
-        // Get updated values from UI
         String businessName = etBusinessName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
+        final String newEmail = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
-        boolean emailNotifications = switchEmailNotifications.isChecked();
-        boolean smsAlerts = switchSmsAlerts.isChecked();
-        boolean publicProfile = switchPublicProfile.isChecked();
 
-        // Validate again (just in case)
-        if (businessName.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+        // Validate
+        if (businessName.isEmpty() || newEmail.isEmpty() || phone.isEmpty() || address.isEmpty()) {
             Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (!isValidEmail(email)) {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
             Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Update user profile object
-        userProfile.setBusinessName(businessName);
-        userProfile.setEmail(email);
-        userProfile.setPhone(phone);
-        userProfile.setAddress(address);
-        userProfile.setEmailNotifications(emailNotifications);
-        userProfile.setSmsAlerts(smsAlerts);
-        userProfile.setPublicProfile(publicProfile);
+        // Show loading
+        if (btnSaveChanges != null) {
+            btnSaveChanges.setEnabled(false);
+            btnSaveChanges.setText("Saving...");
+        }
 
-        // TODO: Save to SharedPreferences, Database, or API
-        // For now, just show a success message
-        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+        // Check if email changed
+        boolean emailChanged = !newEmail.equals(currentUser.getEmail());
 
-        // Return to previous activity with result
-        Intent returnIntent = new Intent();
-        setResult(RESULT_OK, returnIntent);
-        finish();
+        // ALWAYS UPDATE FIRESTORE FIRST with the new email
+        updateFirestoreEmailImmediately(newEmail, businessName, phone, address);
+
+        if (emailChanged) {
+            // Email changed - ask for password to update Firebase Auth
+            showPasswordDialogForAuthUpdate(newEmail);
+        } else {
+            // No email change in Auth, just complete
+            Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK);
+            navigateToProfile();
+        }
+    }
+
+    private void updateFirestoreEmailImmediately(String newEmail, String businessName,
+                                                 String phone, String address) {
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("business_name", businessName);
+        userData.put("full_name", businessName);
+        userData.put("email", newEmail); // Update Firestore immediately
+        userData.put("phone", phone);
+        userData.put("address", address);
+        userData.put("updated_at", System.currentTimeMillis());
+
+        if (imageBase64 != null && !imageBase64.isEmpty()) {
+            userData.put("profile_image_base64", imageBase64);
+            userData.put("has_profile_image", true);
+        }
+
+        db.collection("users").document(currentUser.getUid())
+                .set(userData, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Firestore email updated to: " + newEmail);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update Firestore: " + e.getMessage());
+                });
+    }
+
+    private void showPasswordDialogForAuthUpdate(final String newEmail) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Update Login Email");
+        builder.setMessage("To update your login email, please enter your current password:");
+
+        final TextInputEditText input = new TextInputEditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT |
+                android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setHint("Current Password");
+
+        TextInputLayout inputLayout = new TextInputLayout(this);
+        inputLayout.addView(input);
+        builder.setView(inputLayout);
+
+        builder.setPositiveButton("Update Login", (dialog, which) -> {
+            String password = input.getText().toString().trim();
+            if (password.isEmpty()) {
+                Toast.makeText(this, "Password cannot be empty", Toast.LENGTH_SHORT).show();
+                showPasswordDialogForAuthUpdate(newEmail);
+            } else {
+                updateFirebaseAuthEmail(newEmail, password);
+            }
+        });
+
+        builder.setNegativeButton("Skip Login Update", (dialog, which) -> {
+            // User chooses not to update Firebase Auth
+            Toast.makeText(this,
+                    "Profile updated. Login email remains: " + currentUser.getEmail(),
+                    Toast.LENGTH_LONG).show();
+            setResult(RESULT_OK);
+            navigateToProfile();
+        });
+
+        builder.setNeutralButton("Cancel", (dialog, which) -> {
+            resetSaveButton();
+        });
+
+        builder.create().show();
+    }
+
+    private void updateFirebaseAuthEmail(String newEmail, String password) {
+        // 1. Reauthenticate first
+        AuthCredential credential = EmailAuthProvider.getCredential(currentUser.getEmail(), password);
+
+        currentUser.reauthenticate(credential)
+                .addOnCompleteListener(reauthTask -> {
+                    if (reauthTask.isSuccessful()) {
+                        // 2. Send verification email using verifyBeforeUpdateEmail
+                        currentUser.verifyBeforeUpdateEmail(newEmail)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        // Success! Verification email sent
+                                        Toast.makeText(this,
+                                                "Verification email sent to " + newEmail +
+                                                        ". Please check your inbox.",
+                                                Toast.LENGTH_LONG).show();
+
+                                        // Update Firestore to mark verification pending
+                                        updateFirestoreForPendingVerification(newEmail);
+
+                                        setResult(RESULT_OK);
+                                        navigateToProfile();
+                                    } else {
+                                        // Failed to send verification
+                                        String error = getErrorMessage(task.getException());
+                                        Toast.makeText(this,
+                                                "Could not update login email: " + error,
+                                                Toast.LENGTH_LONG).show();
+                                        resetSaveButton();
+                                    }
+                                });
+                    } else {
+                        // Reauthentication failed
+                        Toast.makeText(this,
+                                "Incorrect password. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                        showPasswordDialogForAuthUpdate(newEmail);
+                    }
+                });
+    }
+
+    private void updateFirestoreForPendingVerification(String pendingEmail) {
+        Map<String, Object> updateData = new HashMap<>();
+        updateData.put("auth_email_pending", pendingEmail);
+        updateData.put("auth_email_status", "verification_sent");
+        updateData.put("auth_email_sent_at", System.currentTimeMillis());
+
+        db.collection("users").document(currentUser.getUid())
+                .update(updateData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Firestore updated for pending email verification");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update Firestore for pending verification: " + e.getMessage());
+                });
+    }
+
+    private String getErrorMessage(Exception exception) {
+        if (exception == null) return "Unknown error";
+        String errorMessage = exception.getMessage();
+        if (errorMessage == null) return "Unknown error";
+
+        if (errorMessage.contains("ERROR_INVALID_EMAIL")) return "Invalid email address";
+        if (errorMessage.contains("ERROR_EMAIL_ALREADY_IN_USE")) return "Email already in use";
+        if (errorMessage.contains("ERROR_REQUIRES_RECENT_LOGIN")) return "Session expired - please login again";
+        if (errorMessage.contains("ERROR_WRONG_PASSWORD")) return "Incorrect password";
+        if (errorMessage.contains("ERROR_USER_NOT_FOUND")) return "Account not found";
+        if (errorMessage.contains("ERROR_USER_DISABLED")) return "Account disabled";
+        if (errorMessage.contains("ERROR_OPERATION_NOT_ALLOWED")) return "Email changes not allowed";
+        if (errorMessage.contains("ERROR_TOO_MANY_REQUESTS")) return "Too many attempts - try later";
+
+        return errorMessage;
+    }
+
+    private void resetSaveButton() {
+        if (btnSaveChanges != null) {
+            btnSaveChanges.setEnabled(true);
+            btnSaveChanges.setText("Save Changes");
+        }
     }
 
     private boolean hasUnsavedChanges() {
-        if (userProfile == null) return false;
+        String currentBusinessName = etBusinessName.getText().toString().trim();
+        String currentEmail = etEmail.getText().toString().trim();
+        String currentPhone = etPhone.getText().toString().trim();
+        String currentAddress = etAddress.getText().toString().trim();
 
-        return !etBusinessName.getText().toString().equals(userProfile.getBusinessName()) ||
-                !etEmail.getText().toString().equals(userProfile.getEmail()) ||
-                !etPhone.getText().toString().equals(userProfile.getPhone()) ||
-                !etAddress.getText().toString().equals(userProfile.getAddress()) ||
-                switchEmailNotifications.isChecked() != userProfile.isEmailNotifications() ||
-                switchSmsAlerts.isChecked() != userProfile.isSmsAlerts() ||
-                switchPublicProfile.isChecked() != userProfile.isPublicProfile();
+        return !currentBusinessName.equals(originalBusinessName) ||
+                !currentEmail.equals(originalEmail) ||
+                !currentPhone.equals(originalPhone) ||
+                !currentAddress.equals(originalAddress);
     }
 
     private void showUnsavedChangesDialog() {
@@ -337,49 +546,24 @@ public class EditProfileActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        if (hasUnsavedChanges()) {
-//            showUnsavedChangesDialog();
-//        } else {
-//            super.onBackPressed();
-//        }
-//    }
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (hasUnsavedChanges()) {
+                    showUnsavedChangesDialog();
+                } else {
+                    navigateToProfile();
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                }
+            }
+        });
+    }
 
-    // Simple UserProfile class (replace with your actual model)
-    public static class UserProfile {
-        private String businessName;
-        private String email;
-        private String phone;
-        private String address;
-        private String accountType;
-        private boolean emailNotifications;
-        private boolean smsAlerts;
-        private boolean publicProfile;
-
-        // Getters and setters
-        public String getBusinessName() { return businessName; }
-        public void setBusinessName(String businessName) { this.businessName = businessName; }
-
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-
-        public String getPhone() { return phone; }
-        public void setPhone(String phone) { this.phone = phone; }
-
-        public String getAddress() { return address; }
-        public void setAddress(String address) { this.address = address; }
-
-        public String getAccountType() { return accountType; }
-        public void setAccountType(String accountType) { this.accountType = accountType; }
-
-        public boolean isEmailNotifications() { return emailNotifications; }
-        public void setEmailNotifications(boolean emailNotifications) { this.emailNotifications = emailNotifications; }
-
-        public boolean isSmsAlerts() { return smsAlerts; }
-        public void setSmsAlerts(boolean smsAlerts) { this.smsAlerts = smsAlerts; }
-
-        public boolean isPublicProfile() { return publicProfile; }
-        public void setPublicProfile(boolean publicProfile) { this.publicProfile = publicProfile; }
+    private void navigateToProfile() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        finish();
     }
 }

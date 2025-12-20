@@ -252,7 +252,7 @@ public class SignUpActivity extends AppCompatActivity {
 //                            }
 
                             // Save user data to Firestore 'users' collection
-                            db.collection("user")
+                            db.collection("users")
                                     .document(firebaseUser.getUid()) // Use Firebase UID as document ID
                                     .set(userData)
                                     .addOnSuccessListener(aVoid -> {
