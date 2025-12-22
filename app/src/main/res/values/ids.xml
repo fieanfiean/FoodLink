@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nav_admin_users" type="id"/>
+    <item name="nav_admin_listings" type="id"/>
+    <item name="nav_admin_reservations" type="id"/>
+</resources>
