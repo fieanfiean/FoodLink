@@ -25,6 +25,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -32,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSignIn;
     private TextView tvForgotPassword, tvSignUp;
     private CardView cardSeller, cardCharity;
-    private String selectedUserType = ""; // Store selected user type
+    private String selectedUserType = "";
+
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +47,13 @@ public class MainActivity extends AppCompatActivity {
         try {
             FirebaseApp.initializeApp(this);
             mAuth = FirebaseAuth.getInstance();
+
+
+            db = FirebaseFirestore.getInstance();
+
         } catch (Exception e) {
             Toast.makeText(this, "Firebase initialization failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            // You might want to proceed without Firebase or exit gracefully
+
             finish();
             return;
         }
@@ -203,8 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
                             // Check if email is verified (important for security)
                             if (user != null && user.isEmailVerified()) {
-                                // User is verified, navigate to appropriate dashboard
-                                navigateToDashboard(userType);
+                                // Routing (uses Firestore fields user_type + is_active)
+                                routeByUserTypeAndActiveFromFirestore(userType);
+
                             } else if (user != null) {
                                 // Email not verified
                                 Toast.makeText(MainActivity.this,
@@ -243,10 +253,75 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 
-                            Toast.makeText(MainActivity.this, errorMessage, // ✅ Fixed: Use MainActivity.this
+                            Toast.makeText(MainActivity.this, errorMessage, // Use MainActivity.this
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
+                });
+    }
+
+    // Routing based on Firestore fields:
+    // - user_type (seller/charity/admin)
+    // - is_active (true/false)
+    private void routeByUserTypeAndActiveFromFirestore(String selectedType) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User session not found. Please login again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String uid = currentUser.getUid();
+
+        // If Firestore wasn't initialized for some reason, fallback
+        if (db == null) {
+            navigateToDashboard(selectedType);
+            return;
+        }
+
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        // fallback to current behavior
+                        navigateToDashboard(selectedType);
+                        return;
+                    }
+
+                    String userType = doc.getString("user_type");      // seller / charity / admin
+                    Boolean isActive = doc.getBoolean("is_active");    // true / false
+
+                    // Block inactive/suspended accounts
+                    if (isActive != null && !isActive) {
+                        Toast.makeText(MainActivity.this,
+                                "Your account is inactive/suspended. Please contact support.",
+                                Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        return;
+                    }
+
+                    // Admin routing
+                    if (userType != null && userType.equalsIgnoreCase("admin")) {
+                        Intent intent = new Intent(MainActivity.this, AdminDashboardActivity.class);
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                        startActivity(intent);
+                        finish();
+                        return;
+                    }
+
+                    // Optional: prevent logging in with wrong selected type
+                    if (userType != null && !userType.equalsIgnoreCase(selectedType)) {
+                        Toast.makeText(MainActivity.this,
+                                "Wrong user type selected. Please select: " + userType,
+                                Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        return;
+                    }
+
+                    // Normal routing
+                    navigateToDashboard(selectedType);
+                })
+                .addOnFailureListener(e -> {
+                    // If Firestore fails, fallback
+                    navigateToDashboard(selectedType);
                 });
     }
 

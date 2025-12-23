@@ -66,6 +66,9 @@
             android:name=".EditFoodListingActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminDashboardActivity" />
+
     </application>
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
