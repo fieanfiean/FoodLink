@@ -57,4 +57,13 @@
     <color name="password_good">#8BC34A</color>     <!-- Light Green -->
     <color name="password_strong">#4CAF50</color>   <!-- Green -->
     <color name="password_very_strong">#2E7D32</color> <!-- Dark Green -->
+
+    <color name="gray_light">#F5F5F5</color>
+    <color name="gray">#9E9E9E</color>
+
+    <!-- Add these to your colors.xml if you want those specific names -->
+    <color name="green_dark">#1B5E20</color>  <!-- Dark green similar to what you had in XML -->
+    <color name="orange_dark">#F57C00</color> <!-- Dark orange -->
+    <color name="blue_dark">#0D47A1</color>   <!-- Dark blue -->
+    <color name="red_dark">#B71C1C</color>    <!-- Dark red -->
 </resources>

@@ -1,9 +1,12 @@
 package com.example.foodlink;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,7 +41,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,18 +99,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
-
-        db.clearPersistence()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Cache cleared successfully");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error clearing cache: " + e.getMessage());
-                });
-
         mAuth = FirebaseAuth.getInstance();
-
-
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -221,6 +212,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
                             String status = document.getString("status");
                             String sellerId = document.getString("seller_id");
                             String documentId = document.getId();
+                            String imageBase64 = document.getString("image_base64"); // Get Base64 image
 
                             // Get quantity as string
                             String quantity = "N/A";
@@ -258,7 +250,8 @@ public class CharityDashboardActivity extends AppCompatActivity {
                                     iconResource,
                                     status,
                                     sellerId,
-                                    documentId
+                                    documentId,
+                                    imageBase64  // Store Base64 image
                             );
 
                             foodListings.add(listing);
@@ -380,9 +373,6 @@ public class CharityDashboardActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-
-        // Note: Remove the hardcoded reserve buttons from onCreate
-        // We'll handle reserve buttons dynamically in createListingCardView
     }
 
     private void navigateToReservation() {
@@ -538,36 +528,47 @@ public class CharityDashboardActivity extends AppCompatActivity {
 
     private CardView createListingCardView(FoodListing listing, int position) {
         try {
-            // Inflate the listing card layout
             LayoutInflater inflater = LayoutInflater.from(this);
             CardView cardView = (CardView) inflater.inflate(
                     R.layout.charity_food_listing_item, llListingsContainer, false);
 
             // Get references to views
+            ImageView ivFoodImage = cardView.findViewById(R.id.ivFoodImage);
             ImageView ivFoodIcon = cardView.findViewById(R.id.ivFoodIcon);
+            TextView tvNoImage = cardView.findViewById(R.id.tvNoImage);
             TextView tvFoodName = cardView.findViewById(R.id.tvFoodName);
             TextView tvCategoryQuantity = cardView.findViewById(R.id.tvCategoryQuantity);
             TextView tvRestaurant = cardView.findViewById(R.id.tvRestaurant);
             TextView tvPickupTime = cardView.findViewById(R.id.tvPickupTime);
             TextView tvExpiryDate = cardView.findViewById(R.id.tvExpiryDate);
+            MaterialButton btnViewDetails = cardView.findViewById(R.id.btnViewDetails); // NEW
             MaterialButton btnReserve = cardView.findViewById(R.id.btnReserve);
 
-            // Set data
-            ivFoodIcon.setImageResource(listing.getIconResource());
+            // Set text data
             tvFoodName.setText(listing.getName());
             tvCategoryQuantity.setText(listing.getCategory() + " • " + listing.getQuantity());
             tvRestaurant.setText(listing.getRestaurant());
             tvPickupTime.setText("Pickup: " + listing.getPickupTime());
             tvExpiryDate.setText("Expires: " + listing.getExpiryDate());
 
+            // Load food image from Base64
+            if (ivFoodImage != null && ivFoodIcon != null) {
+                loadFoodImage(listing.getImageBase64(), ivFoodImage, ivFoodIcon,
+                        tvNoImage, listing.getName(), listing.getCategory());
+            }
+
+            // Set view details button click listener
+            btnViewDetails.setTag(position);
+            btnViewDetails.setOnClickListener(v -> {
+                int pos = (int) v.getTag();
+                viewFoodListingDetails(pos);
+            });
+
             // Set reserve button click listener
             btnReserve.setTag(position);
-            btnReserve.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int pos = (int) v.getTag();
-                    reserveFoodListing(pos);
-                }
+            btnReserve.setOnClickListener(v -> {
+                int pos = (int) v.getTag();
+                reserveFoodListing(pos);
             });
 
             return cardView;
@@ -576,6 +577,89 @@ public class CharityDashboardActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // Add this new method
+    private void viewFoodListingDetails(int position) {
+        if (position < filteredListings.size()) {
+            FoodListing listing = filteredListings.get(position);
+
+            // TEMPORARY: Remove Base64 from the listing to make sure
+            // This is a test to confirm it's the Base64 causing the issue
+            FoodListing listingWithoutImage = new FoodListing(
+                    listing.getName(),
+                    listing.getCategory(),
+                    listing.getQuantity(),
+                    listing.getRestaurant(),
+                    listing.getPickupTime(),
+                    listing.getExpiryDate(),
+                    listing.getIconResource(),
+                    listing.getStatus(),
+                    listing.getSellerId(),
+                    listing.getDocumentId()
+                    // Don't pass imageBase64 in constructor
+            );
+
+            Intent intent = new Intent(this, FoodDetailsActivity.class);
+            // PASS ONLY THE ID
+            intent.putExtra("food_id", listingWithoutImage.getDocumentId());
+            startActivity(intent);
+        }
+    }
+
+    private void loadFoodImage(String imageBase64, ImageView imageView, ImageView iconView,
+                               TextView tvNoImage, String foodName, String category) {
+        // Check if views are null
+        if (imageView == null || iconView == null) {
+            Log.e("CharityDashboard", "Image views are null for: " + foodName);
+            return;
+        }
+
+        if (imageBase64 != null && !imageBase64.trim().isEmpty() && !imageBase64.equals("null")) {
+            try {
+                Log.d("CharityDashboard", "Loading image for: " + foodName);
+
+                // Clean the Base64 string
+                String cleanBase64 = imageBase64.trim();
+                if (cleanBase64.contains("base64,")) {
+                    cleanBase64 = cleanBase64.substring(cleanBase64.indexOf("base64,") + 7);
+                }
+
+                // Decode Base64
+                byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+                if (decodedBytes != null && decodedBytes.length > 0) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+
+                    if (bitmap != null) {
+                        // Show the loaded image, hide the fallback icon
+                        imageView.setImageBitmap(bitmap);
+                        imageView.setVisibility(View.VISIBLE);
+                        iconView.setVisibility(View.GONE);
+                        if (tvNoImage != null) {
+                            tvNoImage.setVisibility(View.GONE);
+                        }
+                        Log.d("CharityDashboard", "✓ Image loaded for: " + foodName);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("CharityDashboard", "✗ Error loading image for " + foodName + ": " + e.getMessage());
+            }
+        }
+
+        // If image loading failed or no image, show fallback icon
+        imageView.setVisibility(View.GONE);
+        iconView.setVisibility(View.VISIBLE);
+
+        // Set category-based icon
+        int iconResource = getIconForCategory(category);
+        iconView.setImageResource(iconResource);
+
+        if (tvNoImage != null) {
+            tvNoImage.setVisibility(View.VISIBLE);
+        }
+        Log.d("CharityDashboard", "Showing fallback icon for: " + foodName);
     }
 
     private void updateListingsCount() {
@@ -648,7 +732,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
         }
     }
 
-    // Updated FoodListing model class
+    // Updated FoodListing model class with image support
     public static class FoodListing {
         private String name;
         private String category;
@@ -660,10 +744,19 @@ public class CharityDashboardActivity extends AppCompatActivity {
         private String status;
         private String sellerId;
         private String documentId;
+        private String imageBase64;
 
         public FoodListing(String name, String category, String quantity,
                            String restaurant, String pickupTime, String expiryDate,
                            int iconResource, String status, String sellerId, String documentId) {
+            this(name, category, quantity, restaurant, pickupTime, expiryDate,
+                    iconResource, status, sellerId, documentId, null);
+        }
+
+        public FoodListing(String name, String category, String quantity,
+                           String restaurant, String pickupTime, String expiryDate,
+                           int iconResource, String status, String sellerId,
+                           String documentId, String imageBase64) {
             this.name = name;
             this.category = category;
             this.quantity = quantity;
@@ -674,6 +767,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
             this.status = status;
             this.sellerId = sellerId;
             this.documentId = documentId;
+            this.imageBase64 = imageBase64;
         }
 
         // Getters
@@ -687,5 +781,6 @@ public class CharityDashboardActivity extends AppCompatActivity {
         public String getStatus() { return status; }
         public String getSellerId() { return sellerId; }
         public String getDocumentId() { return documentId; }
+        public String getImageBase64() { return imageBase64; }
     }
 }

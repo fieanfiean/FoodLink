@@ -172,6 +172,7 @@ public class SellerDashboardActivity extends AppCompatActivity {
         Query activeQuery = db.collection("food_listings")
                 .whereEqualTo("seller_id", currentUserId)
                 .whereEqualTo("status", "available");
+//                .orderBy("created_at");
 
         activeListener = activeQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override

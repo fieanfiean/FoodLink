@@ -230,6 +230,32 @@ public class SignUpActivity extends AppCompatActivity {
                 !etConfirmPassword.getText().toString().isEmpty();
     }
 
+    /**
+     * Checks if an email is already registered in Firebase Auth
+     * @param email The email to check
+     * @param callback Callback to handle the result (true = exists, false = doesn't exist)
+     */
+    private void checkEmailExists(String email, EmailCheckCallback callback) {
+        mAuth.fetchSignInMethodsForEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // If the list of sign-in methods is not empty, email exists
+                        boolean exists = task.getResult().getSignInMethods() != null &&
+                                !task.getResult().getSignInMethods().isEmpty();
+                        callback.onResult(exists);
+                    } else {
+                        // If there's an error, we'll assume email doesn't exist to allow registration attempt
+                        // But we'll log the error
+                        Log.e(TAG, "Error checking email existence: " + task.getException());
+                        callback.onResult(false);
+                    }
+                });
+    }
+
+    interface EmailCheckCallback {
+        void onResult(boolean emailExists);
+    }
+
     private void createAccount() {
         // Get form data
         String name = etName.getText().toString().trim();
@@ -239,19 +265,60 @@ public class SignUpActivity extends AppCompatActivity {
         String password = etPassword.getText().toString();
         String confirmPassword = etConfirmPassword.getText().toString();
 
-        // Validate inputs
-        if (!password.equals(confirmPassword)) {
-            etConfirmPassword.setError("Passwords do not match");
+        // Validate role selection
+        if (selectedRole.isEmpty()) {
+            Toast.makeText(this, "Please select a role (Seller or Charity)", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (password.length() < 6) {
-            etPassword.setError("Minimum 6 characters required");
+        // Validate name
+        if (name.isEmpty()) {
+            etName.setError("Name is required");
+            return;
+        }
+
+        // Validate email
+        if (email.isEmpty()) {
+            etEmail.setError("Email is required");
             return;
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             etEmail.setError("Invalid email format");
+            return;
+        }
+
+        // Validate phone
+        if (phone.isEmpty()) {
+            etPhone.setError("Phone number is required");
+            return;
+        }
+
+        // Validate address
+        if (address.isEmpty()) {
+            etAddress.setError("Address is required");
+            return;
+        }
+
+        // Validate password
+        if (password.isEmpty()) {
+            etPassword.setError("Password is required");
+            return;
+        }
+
+        if (password.length() < 8) {
+            etPassword.setError("Minimum 8 characters required");
+            return;
+        }
+
+        // Validate confirm password
+        if (confirmPassword.isEmpty()) {
+            etConfirmPassword.setError("Please confirm your password");
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            etConfirmPassword.setError("Passwords do not match");
             return;
         }
 
@@ -268,130 +335,148 @@ public class SignUpActivity extends AppCompatActivity {
             // For now, we'll just warn but allow registration
         }
 
-        // Show loading
+        // Show initial loading
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Creating account...");
+        progressDialog.setMessage("Checking email availability...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        // First check if email already exists
+        checkEmailExists(email, new EmailCheckCallback() {
+            @Override
+            public void onResult(boolean emailExists) {
+                if (emailExists) {
+                    progressDialog.dismiss();
+                    etEmail.setError("This email is already registered");
+                    Toast.makeText(SignUpActivity.this,
+                            "Email already registered. Please use a different email or try logging in.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-                        if (firebaseUser != null) {
-                            // Create user data for Firestore
-                            Map<String, Object> userData = new HashMap<>();
+                // Email doesn't exist, proceed with registration
+                progressDialog.setMessage("Creating account...");
 
-                            // Basic user information
-                            userData.put("user_id", firebaseUser.getUid());
-                            userData.put("email", email);
-                            userData.put("user_type", selectedRole); // "seller" or "charity"
-                            userData.put("full_name", name);
-                            userData.put("phone", phone);
-                            userData.put("address", address);
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(SignUpActivity.this, task -> {
+                            if (task.isSuccessful()) {
+                                FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
-                            // Password strength information
-                            userData.put("password_strength_level", passwordStrengthLevel);
-                            userData.put("password_strength_description", passwordStrengthDescription);
-                            userData.put("password_strength_rating", passwordStrengthRating);
-                            userData.put("password_last_updated", System.currentTimeMillis());
+                                if (firebaseUser != null) {
+                                    // Create user data for Firestore
+                                    Map<String, Object> userData = new HashMap<>();
 
-                            // Role-specific fields
-                            if (selectedRole.equals("seller")) {
-                                userData.put("business_name", name); // Using name as business name
-                                userData.put("business_address", address);
-                                userData.put("charity_name", ""); // Empty for sellers
-                                userData.put("charity_registration", "");
-                            } else if (selectedRole.equals("charity")) {
-                                userData.put("charity_name", name); // Using name as charity name
-                                userData.put("charity_address", address);
-                                userData.put("business_name", ""); // Empty for charities
-                                userData.put("business_registration", "");
-                            }
+                                    // Basic user information
+                                    userData.put("user_id", firebaseUser.getUid());
+                                    userData.put("email", email);
+                                    userData.put("user_type", selectedRole); // "seller" or "charity"
+                                    userData.put("full_name", name);
+                                    userData.put("phone", phone);
+                                    userData.put("address", address);
 
-                            // Additional metadata
-                            userData.put("created_at", System.currentTimeMillis());
-                            userData.put("last_login", System.currentTimeMillis());
-                            userData.put("is_active", true);
-                            userData.put("profile_image_url", "");
+                                    // Password strength information
+                                    userData.put("password_strength_level", passwordStrengthLevel);
+                                    userData.put("password_strength_description", passwordStrengthDescription);
+                                    userData.put("password_strength_rating", passwordStrengthRating);
+                                    userData.put("password_last_updated", System.currentTimeMillis());
 
-                            // Statistics (initialize to 0)
-                            if (selectedRole.equals("seller")) {
-                                userData.put("food_saved", 0);
-                                userData.put("donation_made", 0);
-                                userData.put("co2_reduced", 0.0);
-                                userData.put("charities_helped",0);
-                            }
+                                    // Role-specific fields
+                                    if (selectedRole.equals("seller")) {
+                                        userData.put("business_name", name); // Using name as business name
+                                        userData.put("business_address", address);
+                                        userData.put("charity_name", ""); // Empty for sellers
+                                        userData.put("charity_registration", "");
+                                    } else if (selectedRole.equals("charity")) {
+                                        userData.put("charity_name", name); // Using name as charity name
+                                        userData.put("charity_address", address);
+                                        userData.put("business_name", ""); // Empty for charities
+                                        userData.put("business_registration", "");
+                                    }
 
-                            // Save user data to Firestore 'users' collection
-                            db.collection("users")
-                                    .document(firebaseUser.getUid()) // Use Firebase UID as document ID
-                                    .set(userData)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // User data saved successfully
-                                        Log.d(TAG, "User document written with ID: " + firebaseUser.getUid());
+                                    // Additional metadata
+                                    userData.put("created_at", System.currentTimeMillis());
+                                    userData.put("last_login", System.currentTimeMillis());
+                                    userData.put("is_active", true);
+                                    userData.put("profile_image_url", "");
 
-                                        // Send verification email
-                                        firebaseUser.sendEmailVerification()
-                                                .addOnCompleteListener(emailTask -> {
-                                                    progressDialog.dismiss();
+                                    // Statistics (initialize to 0)
+                                    if (selectedRole.equals("seller")) {
+                                        userData.put("food_saved", 0);
+                                        userData.put("donation_made", 0);
+                                        userData.put("co2_reduced", 0.0);
+                                        userData.put("charities_helped",0);
+                                    }
 
-                                                    String message = emailTask.isSuccessful() ?
-                                                            "Verification email sent to " + email +
-                                                                    ". Please check your inbox." :
-                                                            "Account created but failed to send verification email";
+                                    // Save user data to Firestore 'users' collection
+                                    db.collection("users")
+                                            .document(firebaseUser.getUid()) // Use Firebase UID as document ID
+                                            .set(userData)
+                                            .addOnSuccessListener(aVoid -> {
+                                                // User data saved successfully
+                                                Log.d(TAG, "User document written with ID: " + firebaseUser.getUid());
 
-                                                    Toast.makeText(SignUpActivity.this,
-                                                            message,
-                                                            Toast.LENGTH_LONG).show();
+                                                // Send verification email
+                                                firebaseUser.sendEmailVerification()
+                                                        .addOnCompleteListener(emailTask -> {
+                                                            progressDialog.dismiss();
 
-                                                    // Show success message with role
-                                                    String roleDisplay = selectedRole.equals("seller") ? "Seller" : "Charity";
-                                                    Toast.makeText(SignUpActivity.this,
-                                                            roleDisplay + " account created successfully!",
-                                                            Toast.LENGTH_SHORT).show();
+                                                            String message = emailTask.isSuccessful() ?
+                                                                    "Verification email sent to " + email +
+                                                                            ". Please check your inbox." :
+                                                                    "Account created but failed to send verification email";
 
-                                                    // Return to login page with email pre-filled
-                                                    Intent resultIntent = new Intent();
-                                                    resultIntent.putExtra("email", email);
-                                                    setResult(RESULT_OK, resultIntent);
-                                                    finish();
-                                                });
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        progressDialog.dismiss();
-                                        Log.w(TAG, "Error writing user document", e);
+                                                            Toast.makeText(SignUpActivity.this,
+                                                                    message,
+                                                                    Toast.LENGTH_LONG).show();
 
-                                        // User created in Auth but failed to save to Firestore
-                                        Toast.makeText(SignUpActivity.this,
-                                                "Account created but failed to save profile data. Please login and update your profile.",
-                                                Toast.LENGTH_LONG).show();
+                                                            // Show success message with role
+                                                            String roleDisplay = selectedRole.equals("seller") ? "Seller" : "Charity";
+                                                            Toast.makeText(SignUpActivity.this,
+                                                                    roleDisplay + " account created successfully!",
+                                                                    Toast.LENGTH_SHORT).show();
 
-                                        // Still return to login since auth succeeded
-                                        Intent resultIntent = new Intent();
-                                        resultIntent.putExtra("email", email);
-                                        setResult(RESULT_OK, resultIntent);
-                                        finish();
-                                    });
-                        }
-                    } else {
-                        progressDialog.dismiss();
-                        String errorMessage = "Registration failed";
-                        if (task.getException() != null) {
-                            String error = task.getException().getMessage();
-                            if (error.contains("already in use")) {
-                                errorMessage = "Email already registered";
-                            } else if (error.contains("badly formatted")) {
-                                errorMessage = "Invalid email format";
-                            } else if (error.contains("weak password")) {
-                                errorMessage = "Password is too weak";
+                                                            // Return to login page with email pre-filled
+                                                            Intent resultIntent = new Intent();
+                                                            resultIntent.putExtra("email", email);
+                                                            setResult(RESULT_OK, resultIntent);
+                                                            finish();
+                                                        });
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                progressDialog.dismiss();
+                                                Log.w(TAG, "Error writing user document", e);
+
+                                                // User created in Auth but failed to save to Firestore
+                                                Toast.makeText(SignUpActivity.this,
+                                                        "Account created but failed to save profile data. Please login and update your profile.",
+                                                        Toast.LENGTH_LONG).show();
+
+                                                // Still return to login since auth succeeded
+                                                Intent resultIntent = new Intent();
+                                                resultIntent.putExtra("email", email);
+                                                setResult(RESULT_OK, resultIntent);
+                                                finish();
+                                            });
+                                }
                             } else {
-                                errorMessage = error;
+                                progressDialog.dismiss();
+                                String errorMessage = "Registration failed";
+                                if (task.getException() != null) {
+                                    String error = task.getException().getMessage();
+                                    if (error.contains("already in use")) {
+                                        errorMessage = "Email already registered";
+                                    } else if (error.contains("badly formatted")) {
+                                        errorMessage = "Invalid email format";
+                                    } else if (error.contains("weak password")) {
+                                        errorMessage = "Password is too weak";
+                                    } else {
+                                        errorMessage = error;
+                                    }
+                                }
+                                Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
-                        }
-                        Toast.makeText(SignUpActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        });
+            }
+        });
     }
 }

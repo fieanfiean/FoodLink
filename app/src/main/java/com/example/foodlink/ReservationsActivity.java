@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,10 +26,21 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ReservationsActivity extends AppCompatActivity {
 
@@ -53,16 +65,34 @@ public class ReservationsActivity extends AppCompatActivity {
             "Upcoming",
             "Pending",
             "Completed",
-            "Cancelled"
+            "Cancelled",
+            "Expired"
     );
 
-    private BottomNavigationView bottomNavigation;
+    // Firebase
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private ListenerRegistration reservationsListener;
+    private String currentUserId;
+    private String charityName;
 
+    private BottomNavigationView bottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reservations);
+
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            navigateToLogin();
+            return;
+        }
+        currentUserId = currentUser.getUid();
 
         // Initialize UI Components
         initViews();
@@ -73,8 +103,8 @@ public class ReservationsActivity extends AppCompatActivity {
         // Setup status filter dropdown
         setupStatusFilter();
 
-        // Load sample data
-        loadSampleData();
+        // Load charity name and setup Firestore listener
+        loadCharityNameAndSetupListener();
 
         // Setup listeners
         setupListeners();
@@ -82,11 +112,7 @@ public class ReservationsActivity extends AppCompatActivity {
         // Setup recycler view
         setupRecyclerView();
 
-        // Update count
-        updateReservationsCount();
-
         setupBackPressHandler();
-
         setupBottomNavigation();
     }
 
@@ -108,6 +134,203 @@ public class ReservationsActivity extends AppCompatActivity {
         llEmptyState = findViewById(R.id.llEmptyState);
 
         bottomNavigation = findViewById(R.id.bottomNavigation);
+    }
+
+    private void loadCharityNameAndSetupListener() {
+        // Load charity name from Firestore
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        charityName = documentSnapshot.getString("charity_name");
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("organization_name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("full_name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = "Charity Organization";
+                        }
+
+                        // Setup Firestore listener after getting charity name
+                        setupReservationsListener();
+                    } else {
+                        charityName = "Charity Organization";
+                        setupReservationsListener();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    charityName = "Charity Organization";
+                    setupReservationsListener();
+                });
+    }
+
+    private void setupReservationsListener() {
+        // Query to fetch food listings reserved by this charity
+        Query query = db.collection("food_listings")
+                .whereEqualTo("reserved_by", currentUserId);
+
+        reservationsListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Toast.makeText(ReservationsActivity.this,
+                            "Error loading reservations: " + error.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                    reservations.clear();
+
+                    for (com.google.firebase.firestore.DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        try {
+                            String documentId = document.getId();
+                            String foodName = document.getString("food_name");
+                            String category = document.getString("category");
+                            Object quantityObj = document.get("quantity");
+                            String sellerName = document.getString("seller_name");
+                            String startTime = document.getString("start_time");
+                            String endTime = document.getString("end_time");
+                            String expiryDate = document.getString("expiry_date");
+                            String status = document.getString("status");
+                            String sellerId = document.getString("seller_id");
+                            String reservedBy = document.getString("reserved_by");
+                            String reservedCharity = document.getString("reserved_charity");
+                            String imageBase64 = document.getString("image_base64");
+
+                            // Get pickup address
+                            String pickupAddress = document.getString("pickup_address");
+                            if (pickupAddress == null) {
+                                pickupAddress = document.getString("address");
+                            }
+
+                            // Get quantity as string
+                            String quantity = "N/A";
+                            if (quantityObj != null) {
+                                if (quantityObj instanceof Long) {
+                                    quantity = ((Long) quantityObj).intValue() + " kg";
+                                } else if (quantityObj instanceof Double) {
+                                    quantity = ((Double) quantityObj).intValue() + " kg";
+                                } else if (quantityObj instanceof Integer) {
+                                    quantity = (Integer) quantityObj + " kg";
+                                } else if (quantityObj instanceof String) {
+                                    quantity = (String) quantityObj;
+                                }
+                            }
+
+                            // Get restaurant name
+                            String restaurant = sellerName != null ? sellerName : "Restaurant";
+
+                            // Get pickup time
+                            String pickupTime = "N/A";
+                            if (startTime != null && endTime != null) {
+                                pickupTime = formatTime(startTime) + "-" + formatTime(endTime);
+                            }
+
+                            // Determine status based on current status and expiry date
+                            String reservationStatus = determineReservationStatus(expiryDate, status);
+
+                            // Create reservation object
+                            Reservation reservation = new Reservation(
+                                    documentId,
+                                    foodName,
+                                    restaurant,
+                                    quantity,
+                                    pickupTime,
+                                    expiryDate,
+                                    reservationStatus,
+                                    category,
+                                    sellerId,
+                                    reservedBy,
+                                    reservedCharity,
+                                    pickupAddress,
+                                    imageBase64
+                            );
+
+                            reservations.add(reservation);
+
+                        } catch (Exception e) {
+                            // Skip problematic reservations
+                        }
+                    }
+
+                    // Initially show all reservations
+                    filteredReservations.clear();
+                    filteredReservations.addAll(reservations);
+
+                    // Update UI
+                    updateUI();
+                } else {
+                    // No reservations found
+                    reservations.clear();
+                    filteredReservations.clear();
+                    updateUI();
+                }
+            }
+        });
+    }
+
+    private String determineReservationStatus(String expiryDate, String originalStatus) {
+        try {
+            // If status is already completed or cancelled, keep it
+            if ("completed".equals(originalStatus) || "cancelled".equals(originalStatus)) {
+                return originalStatus;
+            }
+
+            // Check if expired
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date expiry = sdf.parse(expiryDate);
+            Date today = new Date();
+
+            // Remove time part for comparison
+            today = sdf.parse(sdf.format(today));
+
+            if (expiry.before(today)) {
+                return "Expired";
+            }
+
+            // If not expired, return the original status or default to "Upcoming"
+            if (originalStatus != null && !originalStatus.isEmpty()) {
+                return originalStatus;
+            }
+            return "Upcoming";
+
+        } catch (Exception e) {
+            return "Upcoming";
+        }
+    }
+
+    private String formatTime(String time) {
+        try {
+            if (time == null || time.isEmpty()) {
+                return "N/A";
+            }
+
+            // Assuming time is in HH:mm format or similar
+            if (time.contains(":")) {
+                String[] parts = time.split(":");
+                if (parts.length >= 2) {
+                    int hour = Integer.parseInt(parts[0]);
+                    String minute = parts[1];
+
+                    // Convert to 12-hour format
+                    String amPm = hour >= 12 ? "PM" : "AM";
+                    hour = hour % 12;
+                    hour = hour == 0 ? 12 : hour;
+
+                    return String.format(Locale.getDefault(), "%d:%s %s", hour, minute, amPm);
+                }
+            }
+            return time;
+        } catch (Exception e) {
+            return time;
+        }
     }
 
     private void setupToolbar() {
@@ -132,7 +355,6 @@ public class ReservationsActivity extends AppCompatActivity {
         statusAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedStatus = statusFilters.get(position);
                 filterReservations();
             }
         });
@@ -168,64 +390,6 @@ public class ReservationsActivity extends AppCompatActivity {
         rvReservations.setAdapter(reservationsAdapter);
     }
 
-    private void loadSampleData() {
-        reservations.clear();
-
-        // Add sample reservations
-        reservations.add(new Reservation(
-                "RES001",
-                "Assorted Fresh Bread",
-                "Sunrise Bakery",
-                "20 loaves",
-                "19:00-21:00",
-                "2025-12-17",
-                "Upcoming"
-        ));
-
-        reservations.add(new Reservation(
-                "RES002",
-                "Fresh Vegetable Salad Mix",
-                "Green Leaf Restaurant",
-                "5 kg",
-                "18:00-20:00",
-                "2025-12-17",
-                "Pending"
-        ));
-
-        reservations.add(new Reservation(
-                "RES003",
-                "Mixed Fruit Basket",
-                "Fresh Farm Market",
-                "3 kg",
-                "14:00-16:00",
-                "2025-12-16",
-                "Completed"
-        ));
-
-        reservations.add(new Reservation(
-                "RES004",
-                "Prepared Meals Pack",
-                "Community Kitchen",
-                "12 portions",
-                "16:00-18:00",
-                "2025-12-18",
-                "Cancelled"
-        ));
-
-        reservations.add(new Reservation(
-                "RES005",
-                "Milk and Cheese",
-                "Dairy Delight",
-                "8 liters",
-                "10:00-12:00",
-                "2025-12-19",
-                "Upcoming"
-        ));
-
-        // Initially show all reservations
-        filteredReservations.addAll(reservations);
-    }
-
     private void setupListeners() {
         // Back button
         ivBack.setOnClickListener(new View.OnClickListener() {
@@ -239,8 +403,7 @@ public class ReservationsActivity extends AppCompatActivity {
         ivNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navigate to notifications
-                Toast.makeText(ReservationsActivity.this, "Notifications", Toast.LENGTH_SHORT).show();
+                navigateToNotification();
             }
         });
 
@@ -265,19 +428,31 @@ public class ReservationsActivity extends AppCompatActivity {
                 browseFoodButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Navigate back to browse food
-                        finish();
-//                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                        navigateToDashboard();
                     }
                 });
             }
         }
     }
+
+    private void navigateToNotification() {
+        Intent intent = new Intent(this, NotificationsActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     private void setupBottomNavigation() {
         // Clear existing menu items
         bottomNavigation.getMenu().clear();
 
-        // Add only the items you want for seller
+        // Add only the items you want for charity
         bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "BrowseFood")
                 .setIcon(R.drawable.ic_dashboard);
 
@@ -295,12 +470,10 @@ public class ReservationsActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_dashboard) {
                     navigateToDashboard();
                     return true;
-                }
-                else if (itemId == R.id.nav_reservations) {
-//                    navigateToReservation();
+                } else if (itemId == R.id.nav_reservations) {
+                    // Already on reservations page
                     return true;
-                }
-                else if (itemId == R.id.nav_profile) {
+                } else if (itemId == R.id.nav_profile) {
                     navigateToProfile();
                     return true;
                 }
@@ -308,7 +481,7 @@ public class ReservationsActivity extends AppCompatActivity {
             }
         });
 
-        // Set dashboard as selected
+        // Set reservations as selected
         bottomNavigation.setSelectedItemId(R.id.nav_reservations);
     }
 
@@ -337,9 +510,6 @@ public class ReservationsActivity extends AppCompatActivity {
         });
     }
 
-
-
-
     private void filterReservations() {
         filteredReservations.clear();
 
@@ -354,7 +524,7 @@ public class ReservationsActivity extends AppCompatActivity {
 
             // Check if reservation matches selected status
             boolean matchesStatus = selectedStatus.equals("All") ||
-                    selectedStatus.equals(reservation.getStatus());
+                    selectedStatus.equalsIgnoreCase(reservation.getStatus());
 
             if (matchesSearch && matchesStatus) {
                 filteredReservations.add(reservation);
@@ -388,24 +558,50 @@ public class ReservationsActivity extends AppCompatActivity {
     }
 
     private void confirmPickup(Reservation reservation) {
-        Toast.makeText(this,
-                "Confirming pickup for: " + reservation.getFoodItem(),
-                Toast.LENGTH_SHORT).show();
-        // TODO: Implement actual confirmation logic
+        // Update status to "completed" in Firestore
+        db.collection("food_listings").document(reservation.getId())
+                .update("status", "completed")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this,
+                            "Pickup confirmed for: " + reservation.getFoodItem(),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this,
+                            "Failed to confirm pickup: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void cancelReservation(Reservation reservation) {
-        Toast.makeText(this,
-                "Cancelling reservation: " + reservation.getFoodItem(),
-                Toast.LENGTH_SHORT).show();
-        // TODO: Implement actual cancellation logic
+        // Update status back to "available" in Firestore
+        db.collection("food_listings").document(reservation.getId())
+                .update("status", "available", "reserved_by", null, "reserved_charity", null)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this,
+                            "Reservation cancelled: " + reservation.getFoodItem(),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this,
+                            "Failed to cancel reservation: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void viewReservationDetails(Reservation reservation) {
-        Toast.makeText(this,
-                "Viewing details for: " + reservation.getFoodItem(),
-                Toast.LENGTH_SHORT).show();
-        // TODO: Navigate to reservation details screen
+        Intent intent = new Intent(this, ReservationsAdapter.class);
+        intent.putExtra("reservation_id", reservation.getId());
+        intent.putExtra("food_name", reservation.getFoodItem());
+        intent.putExtra("restaurant", reservation.getRestaurant());
+        intent.putExtra("quantity", reservation.getQuantity());
+        intent.putExtra("pickup_time", reservation.getPickupTime());
+        intent.putExtra("expiry_date", reservation.getExpiryDate());
+        intent.putExtra("status", reservation.getStatus());
+        intent.putExtra("category", reservation.getCategory());
+        intent.putExtra("pickup_address", reservation.getPickupAddress());
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private void reorderReservation(Reservation reservation) {
@@ -415,13 +611,28 @@ public class ReservationsActivity extends AppCompatActivity {
         // TODO: Implement reorder logic
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        super.onBackPressed();
-//        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Reconnect listener
+        if (currentUserId != null && mAuth.getCurrentUser() != null) {
+            if (reservationsListener == null) {
+                setupReservationsListener();
+            }
+        }
+    }
 
-    // Reservation model class
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Remove listener to prevent memory leaks
+        if (reservationsListener != null) {
+            reservationsListener.remove();
+            reservationsListener = null;
+        }
+    }
+
+    // Enhanced Reservation model class
     public static class Reservation {
         private String id;
         private String foodItem;
@@ -430,9 +641,17 @@ public class ReservationsActivity extends AppCompatActivity {
         private String pickupTime;
         private String expiryDate;
         private String status;
+        private String category;
+        private String sellerId;
+        private String reservedBy;
+        private String reservedCharity;
+        private String pickupAddress;
+        private String imageBase64;
 
         public Reservation(String id, String foodItem, String restaurant, String quantity,
-                           String pickupTime, String expiryDate, String status) {
+                           String pickupTime, String expiryDate, String status,
+                           String category, String sellerId, String reservedBy,
+                           String reservedCharity, String pickupAddress, String imageBase64) {
             this.id = id;
             this.foodItem = foodItem;
             this.restaurant = restaurant;
@@ -440,6 +659,19 @@ public class ReservationsActivity extends AppCompatActivity {
             this.pickupTime = pickupTime;
             this.expiryDate = expiryDate;
             this.status = status;
+            this.category = category;
+            this.sellerId = sellerId;
+            this.reservedBy = reservedBy;
+            this.reservedCharity = reservedCharity;
+            this.pickupAddress = pickupAddress;
+            this.imageBase64 = imageBase64;
+        }
+
+        // Simplified constructor for backward compatibility
+        public Reservation(String id, String foodItem, String restaurant, String quantity,
+                           String pickupTime, String expiryDate, String status, String imageBase64) {
+            this(id, foodItem, restaurant, quantity, pickupTime, expiryDate, status, imageBase64,
+                    "", "", "", "", "");
         }
 
         // Getters
@@ -450,5 +682,12 @@ public class ReservationsActivity extends AppCompatActivity {
         public String getPickupTime() { return pickupTime; }
         public String getExpiryDate() { return expiryDate; }
         public String getStatus() { return status; }
+        public String getCategory() { return category; }
+        public String getSellerId() { return sellerId; }
+        public String getReservedBy() { return reservedBy; }
+        public String getReservedCharity() { return reservedCharity; }
+        public String getPickupAddress() { return pickupAddress; }
+        public String getImageBase64() { return imageBase64; }
+
     }
 }

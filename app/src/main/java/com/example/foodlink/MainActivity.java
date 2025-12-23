@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etEmail, etPassword;
     private Button btnSignIn;
     private TextView tvForgotPassword, tvSignUp;
-    private CardView cardSeller, cardCharity;
+    private CardView cardSeller, cardCharity, cardAdmin;
     private String selectedUserType = "";
 
     private FirebaseFirestore db;
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         tvSignUp = findViewById(R.id.tvSignUp);
         cardSeller = findViewById(R.id.cardSeller);
         cardCharity = findViewById(R.id.cardCharity);
+        cardAdmin = findViewById(R.id.cardAdmin);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -80,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
         cardCharity.setOnClickListener(v -> {
             selectUserType("charity");
         });
+
+        cardAdmin.setOnClickListener(view -> {
+            selectUserType("admin");
+        });
+
+
 
         // Set click listeners for buttons
         btnSignIn.setOnClickListener(v -> {
@@ -174,6 +181,12 @@ public class MainActivity extends AppCompatActivity {
 //            cardCharity.setStrokeWidth(4);
             cardCharity.setCardElevation(8);
             selectedUserType = "charity";
+        } else if (type.equals("admin")) {
+            cardAdmin.setCardBackgroundColor(Color.parseColor("#E3F2FD"));
+//            cardCharity.setStrokeColor(Color.parseColor("#2196F3"));
+//            cardCharity.setStrokeWidth(4);
+            cardAdmin.setCardElevation(8);
+            selectedUserType = "admin";
         }
     }
 
@@ -190,6 +203,8 @@ public class MainActivity extends AppCompatActivity {
 //        cardCharity.setStrokeWidth(1);
         cardCharity.setCardElevation(4);
 
+        cardAdmin.setCardBackgroundColor(Color.parseColor("#F5F5F5"));
+        cardAdmin.setCardElevation(4);
         selectedUserType = "";
     }
 
@@ -337,6 +352,11 @@ public class MainActivity extends AppCompatActivity {
             finish();
         } else if (userType.equals("charity")) {
             Intent intent = new Intent(this, CharityDashboardActivity.class);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            startActivity(intent);
+            finish();
+        } else if(userType.equals("admin")){
+            Intent intent = new Intent(this, AdminDashboardActivity.class);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             startActivity(intent);
             finish();

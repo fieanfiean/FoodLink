@@ -67,6 +67,10 @@
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".FoodDetailsActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".AdminDashboardActivity" />
 
     </application>

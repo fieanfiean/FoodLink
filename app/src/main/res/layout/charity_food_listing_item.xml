@@ -30,20 +30,38 @@
                 app:cardBackgroundColor="#F5F5F5"
                 android:layout_marginEnd="16dp">
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:layout_height="match_parent">
 
+                    <!-- Main Food Image (loaded from Base64) -->
+                    <ImageView
+                        android:id="@+id/ivFoodImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"/>
+
+                    <!-- Fallback Food Icon (shown when no image) -->
                     <ImageView
                         android:id="@+id/ivFoodIcon"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
+                        android:layout_gravity="center"
                         android:src="@drawable/ic_food"
                         app:tint="#4CAF50"/>
 
-                </LinearLayout>
+                    <!-- "No Image" Text (optional) -->
+                    <TextView
+                        android:id="@+id/tvNoImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No Image"
+                        android:textSize="10sp"
+                        android:textColor="#666666"
+                        android:layout_gravity="bottom|center"
+                        android:layout_marginBottom="4dp"
+                        android:visibility="gone"/>
+                </FrameLayout>
             </androidx.cardview.widget.CardView>
 
             <!-- Food Details -->
@@ -158,16 +176,41 @@
 
         </LinearLayout>
 
-        <!-- Reserve Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnReserve"
+        <!-- Action Buttons -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Reserve Now"
-            android:textSize="16sp"
-            android:textColor="#FFFFFF"
-            app:backgroundTint="#4CAF50"
-            app:cornerRadius="8dp"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- View Details Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewDetails"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="View Details"
+                android:textSize="16sp"
+                android:textColor="#2196F3"
+                app:backgroundTint="#FFFFFF"
+                app:strokeColor="#2196F3"
+                app:strokeWidth="1dp"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <!-- Reserve Now Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReserve"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Reserve Now"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#4CAF50"
+                app:cornerRadius="8dp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
