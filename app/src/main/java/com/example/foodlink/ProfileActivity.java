@@ -126,14 +126,106 @@ public class ProfileActivity extends AppCompatActivity {
         // Clear existing menu items
         bottomNavigation.getMenu().clear();
 
-        // Add only the items you want for seller
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
+            if(documentSnapshot.exists()){
+                String userType = documentSnapshot.getString("user_type");
+
+                // Clear menu again inside the callback (just to be safe)
+                bottomNavigation.getMenu().clear();
+
+                if(userType != null && userType.equals("seller")){
+                    // Add only the items you want for seller
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "Dashboard")
+                            .setIcon(R.drawable.ic_dashboard);
+
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_add, 2, "Add")
+                            .setIcon(R.drawable.ic_add);
+
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 3, "Profile")
+                            .setIcon(R.drawable.ic_profile);
+
+                    bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                            int itemId = item.getItemId();
+
+                            if (itemId == R.id.nav_dashboard) {
+                                navigateToDashboard(userType);
+                                return true;
+                            } else if (itemId == R.id.nav_add) {
+                                navigateToAddListing();
+                                return true;
+                            } else if (itemId == R.id.nav_profile) {
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                } else if(userType != null && userType.equals("charity")){
+                    // Add only the items you want for charity
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "Dashboard")
+                            .setIcon(R.drawable.ic_dashboard);
+
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_reservations, 2, "Reservation")
+                            .setIcon(R.drawable.ic_reservation);
+
+                    bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 3, "Profile")
+                            .setIcon(R.drawable.ic_profile);
+
+                    bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                            int itemId = item.getItemId();
+
+                            if (itemId == R.id.nav_dashboard) {
+                                navigateToDashboard(userType);
+                                return true;
+                            } else if (itemId == R.id.nav_reservations) {
+                                navigateToReservation();
+                                return true;
+                            } else if (itemId == R.id.nav_profile) {
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                } else {
+                    // Default/fallback navigation
+                    setupDefaultBottomNavigation();
+                }
+
+                // IMPORTANT: Set profile as selected AFTER adding menu items
+                // This should be inside the success callback
+                bottomNavigation.setSelectedItemId(R.id.nav_profile);
+
+            } else {
+                // Document doesn't exist, setup default navigation
+                setupDefaultBottomNavigation();
+                bottomNavigation.setSelectedItemId(R.id.nav_profile);
+            }
+        }).addOnFailureListener(e -> {
+            // Handle failure
+            Toast.makeText(this, "Error loading user data", Toast.LENGTH_SHORT).show();
+            setupDefaultBottomNavigation();
+            bottomNavigation.setSelectedItemId(R.id.nav_profile);
+        });
+    }
+
+    private void setupDefaultBottomNavigation() {
+        bottomNavigation.getMenu().clear();
+
         bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "Dashboard")
                 .setIcon(R.drawable.ic_dashboard);
 
-        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_add, 2, "Add")
-                .setIcon(R.drawable.ic_add);
-
-        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 3, "Profile")
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 2, "Profile")
                 .setIcon(R.drawable.ic_profile);
 
         bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
@@ -142,10 +234,9 @@ public class ProfileActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
 
                 if (itemId == R.id.nav_dashboard) {
-                    navigateToDashboard();
-                    return true;
-                } else if (itemId == R.id.nav_add) {
-                    navigateToAddListing();
+                    // Navigate to appropriate dashboard based on stored user type
+                    String defaultType = sessionManager.getUserType(); // Or get from SharedPreferences
+                    navigateToDashboard(defaultType != null ? defaultType : "user");
                     return true;
                 } else if (itemId == R.id.nav_profile) {
                     return true;
@@ -153,9 +244,6 @@ public class ProfileActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        // Set dashboard as selected
-        bottomNavigation.setSelectedItemId(R.id.nav_profile);
     }
 
     private void loadProfileDataFromFirestore() {
@@ -478,14 +566,28 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void navigateToDashboard() {
-        Intent intent = new Intent(this, SellerDashboardActivity.class);
-        startActivity(intent);
-        finish();
+    private void navigateToDashboard(String userType) {
+        if(userType.equals("seller")){
+            Intent intent = new Intent(this, SellerDashboardActivity.class);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            startActivity(intent);
+            finish();
+        } else if (userType.equals("charity")) {
+            Intent intent = new Intent(this, CharityDashboardActivity.class);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void navigateToAddListing() {
         Intent intent = new Intent(this, AddNewFoodListingActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToReservation() {
+        Intent intent = new Intent(this, ReservationsActivity.class);
         startActivity(intent);
         finish();
     }
@@ -503,8 +605,29 @@ public class ProfileActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                navigateToDashboard();
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+
+                if (currentUser == null) {
+                    // User is not logged in, handle this case
+//                    Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+                    // Optionally navigate to login screen
+                    return;
+                }
+
+                String userId = currentUser.getUid();
+                db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("user_type");
+                        if(userType.equals("seller")){
+                            navigateToDashboard(userType);
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                        }
+                        else if(userType.equals("charity")){
+                            navigateToDashboard(userType);
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                        }
+                    }
+                });
             }
         });
     }

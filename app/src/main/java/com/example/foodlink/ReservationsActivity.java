@@ -1,8 +1,11 @@
 package com.example.foodlink;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -11,11 +14,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -49,6 +56,9 @@ public class ReservationsActivity extends AppCompatActivity {
             "Cancelled"
     );
 
+    private BottomNavigationView bottomNavigation;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +84,10 @@ public class ReservationsActivity extends AppCompatActivity {
 
         // Update count
         updateReservationsCount();
+
+        setupBackPressHandler();
+
+        setupBottomNavigation();
     }
 
     private void initViews() {
@@ -92,6 +106,8 @@ public class ReservationsActivity extends AppCompatActivity {
         // List
         rvReservations = findViewById(R.id.rvReservations);
         llEmptyState = findViewById(R.id.llEmptyState);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
     private void setupToolbar() {
@@ -257,6 +273,72 @@ public class ReservationsActivity extends AppCompatActivity {
             }
         }
     }
+    private void setupBottomNavigation() {
+        // Clear existing menu items
+        bottomNavigation.getMenu().clear();
+
+        // Add only the items you want for seller
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "BrowseFood")
+                .setIcon(R.drawable.ic_dashboard);
+
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_reservations, 2, "Reservation")
+                .setIcon(R.drawable.ic_reservation);
+
+        bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_profile, 3, "Profile")
+                .setIcon(R.drawable.ic_profile);
+
+        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.nav_dashboard) {
+                    navigateToDashboard();
+                    return true;
+                }
+                else if (itemId == R.id.nav_reservations) {
+//                    navigateToReservation();
+                    return true;
+                }
+                else if (itemId == R.id.nav_profile) {
+                    navigateToProfile();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        // Set dashboard as selected
+        bottomNavigation.setSelectedItemId(R.id.nav_reservations);
+    }
+
+    private void navigateToProfile() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        finish();
+    }
+
+    private void navigateToDashboard() {
+        Intent intent = new Intent(this, CharityDashboardActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        finish();
+    }
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                navigateToDashboard();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                finish();
+            }
+        });
+    }
+
+
+
 
     private void filterReservations() {
         filteredReservations.clear();

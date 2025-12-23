@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,22 +13,44 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FieldValue;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CharityDashboardActivity extends AppCompatActivity {
 
@@ -40,7 +64,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
     private TextInputLayout filterDropdownLayout;
     private AutoCompleteTextView categoryAutoComplete;
     private TextView tvListingCount;
-    private View llListingsContainer;
+    private LinearLayout llListingsContainer;
     private View cardEmptyState;
 
     // Data
@@ -56,6 +80,14 @@ public class CharityDashboardActivity extends AppCompatActivity {
             "Other"
     );
 
+    // Firebase
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private ListenerRegistration listingsListener;
+    private String currentUserId;
+
+    private String charityName;
+
     private BottomNavigationView bottomNavigation;
 
     @Override
@@ -63,24 +95,46 @@ public class CharityDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_charity_dashboard);
 
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+
+        db.clearPersistence()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Cache cleared successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error clearing cache: " + e.getMessage());
+                });
+
+        mAuth = FirebaseAuth.getInstance();
+
+
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            navigateToLogin();
+            return;
+        }
+        currentUserId = currentUser.getUid();
+
         // Initialize UI Components
         initViews();
 
         // Setup exposed dropdown menu
         setupExposedDropdownMenu();
 
-        // Load sample data
-        loadSampleData();
-
         // Setup listeners
         setupListeners();
-        setupBottomNavigation();
 
-        // Setup toolbar
+        setupBottomNavigation();
+        setupBackPressHandler();
         setupToolbar();
 
-        // Update listings count
-        updateListingsCount();
+        // Load user data
+        loadUserData();
+
+        // Load food listings from Firebase
+        setupFoodListingsListener();
     }
 
     private void initViews() {
@@ -108,63 +162,168 @@ public class CharityDashboardActivity extends AppCompatActivity {
         bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
-    private void loadSampleData() {
-        // Clear existing data
-        foodListings.clear();
+    private void loadUserData() {
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        charityName = documentSnapshot.getString("charity_name");
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("organization_name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("full_name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = documentSnapshot.getString("name");
+                        }
+                        if (charityName == null || charityName.isEmpty()) {
+                            charityName = "Hope Community Kitchen";
+                        }
+                        tvCharityName.setText(charityName); // Set UI text
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    tvCharityName.setText("Hope Community Kitchen");
+                });
+    }
 
-        // Add sample food listings
-        foodListings.add(new FoodListing(
-                "Fresh Vegetable Salad Mix",
-                "Vegetables",
-                "5 kg",
-                "Green Leaf Restaurant",
-                "18:00-20:00",
-                "2025-12-17",
-                R.drawable.ic_vegetables
-        ));
+    private void setupFoodListingsListener() {
+        // CORRECTED: Use just "available" string, not Arrays.asList()
+        Query query = db.collection("food_listings")
+                .whereEqualTo("status", "available")  // Fixed this line
+                .whereGreaterThanOrEqualTo("expiry_date", getCurrentDate())
+                .orderBy("expiry_date");
 
-        foodListings.add(new FoodListing(
-                "Assorted Pastries",
-                "Bakery",
-                "25 pieces",
-                "Sunshine Bakery",
-                "09:00-17:00",
-                "2025-12-18",
-                R.drawable.ic_bakery
-        ));
+        listingsListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot querySnapshot,
+                                @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Toast.makeText(CharityDashboardActivity.this,
+                            "Error loading listings: " + error.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-        foodListings.add(new FoodListing(
-                "Mixed Fruit Basket",
-                "Fruits",
-                "3 kg",
-                "Fresh Farm Market",
-                "14:00-18:00",
-                "2025-12-16",
-                R.drawable.ic_fruits
-        ));
+                if (querySnapshot != null) {
+                    foodListings.clear();
 
-        foodListings.add(new FoodListing(
-                "Prepared Meals Pack",
-                "Prepared Food",
-                "12 portions",
-                "Community Kitchen",
-                "16:00-19:00",
-                "2025-12-19",
-                R.drawable.ic_meal
-        ));
+                    for (com.google.firebase.firestore.DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        try {
+                            String foodName = document.getString("food_name");
+                            String category = document.getString("category");
+                            Object quantityObj = document.get("quantity");
+                            String sellerName = document.getString("seller_name");
+                            String startTime = document.getString("start_time");
+                            String endTime = document.getString("end_time");
+                            String expiryDate = document.getString("expiry_date");
+                            String status = document.getString("status");
+                            String sellerId = document.getString("seller_id");
+                            String documentId = document.getId();
 
-        foodListings.add(new FoodListing(
-                "Milk and Cheese",
-                "Dairy",
-                "8 liters",
-                "Dairy Delight",
-                "10:00-15:00",
-                "2025-12-20",
-                R.drawable.ic_dairy
-        ));
+                            // Get quantity as string
+                            String quantity = "N/A";
+                            if (quantityObj != null) {
+                                if (quantityObj instanceof Long) {
+                                    quantity = ((Long) quantityObj).intValue() + " kg";
+                                } else if (quantityObj instanceof Double) {
+                                    quantity = ((Double) quantityObj).intValue() + " kg";
+                                } else if (quantityObj instanceof Integer) {
+                                    quantity = (Integer) quantityObj + " kg";
+                                } else if (quantityObj instanceof String) {
+                                    quantity = (String) quantityObj;
+                                }
+                            }
 
-        // Initially show all listings
-        filteredListings.addAll(foodListings);
+                            // Get restaurant name from seller data or use seller name
+                            String restaurant = sellerName != null ? sellerName : "Restaurant";
+
+                            // Get pickup time
+                            String pickupTime = "N/A";
+                            if (startTime != null && endTime != null) {
+                                pickupTime = formatTime(startTime) + "-" + formatTime(endTime);
+                            }
+
+                            // Map category to icon
+                            int iconResource = getIconForCategory(category);
+
+                            FoodListing listing = new FoodListing(
+                                    foodName,
+                                    category,
+                                    quantity,
+                                    restaurant,
+                                    pickupTime,
+                                    expiryDate,
+                                    iconResource,
+                                    status,
+                                    sellerId,
+                                    documentId
+                            );
+
+                            foodListings.add(listing);
+
+                        } catch (Exception e) {
+                            // Skip problematic listings
+                        }
+                    }
+
+                    // Initially show all listings
+                    filteredListings.clear();
+                    filteredListings.addAll(foodListings);
+
+                    // Update UI
+                    updateUI();
+                }
+            }
+        });
+    }
+
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+
+    private String formatTime(String time) {
+        try {
+            // Assuming time is in HH:mm format or similar
+            if (time.contains(":")) {
+                String[] parts = time.split(":");
+                if (parts.length >= 2) {
+                    int hour = Integer.parseInt(parts[0]);
+                    String minute = parts[1];
+
+                    // Convert to 12-hour format
+                    String amPm = hour >= 12 ? "PM" : "AM";
+                    hour = hour % 12;
+                    hour = hour == 0 ? 12 : hour;
+
+                    return String.format(Locale.getDefault(), "%d:%s %s", hour, minute, amPm);
+                }
+            }
+            return time;
+        } catch (Exception e) {
+            return time;
+        }
+    }
+
+    private int getIconForCategory(String category) {
+        if (category == null) return R.drawable.ic_food;
+
+        switch (category.toLowerCase()) {
+            case "vegetables":
+                return R.drawable.ic_vegetables;
+            case "fruits":
+                return R.drawable.ic_fruits;
+            case "bakery":
+                return R.drawable.ic_bakery;
+            case "prepared food":
+                return R.drawable.ic_meal;
+            case "dairy":
+                return R.drawable.ic_dairy;
+            default:
+                return R.drawable.ic_food;
+        }
     }
 
     private void setupToolbar() {
@@ -180,7 +339,6 @@ public class CharityDashboardActivity extends AppCompatActivity {
         ivNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(CharityDashboardActivity.this, "Notifications", Toast.LENGTH_SHORT).show();
                 navigateToNotification();
             }
         });
@@ -189,7 +347,6 @@ public class CharityDashboardActivity extends AppCompatActivity {
         ivProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CharityDashboardActivity.this, "Profile", Toast.LENGTH_SHORT).show();
                 navigateToProfile();
             }
         });
@@ -198,8 +355,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
         btnBrowseFood.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CharityDashboardActivity.this, "Browse Food", Toast.LENGTH_SHORT).show();
-                navigateToBrowseFood();
+                // Already on browse food page
             }
         });
 
@@ -207,7 +363,6 @@ public class CharityDashboardActivity extends AppCompatActivity {
         btnMyReservations.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CharityDashboardActivity.this, "My Reservations", Toast.LENGTH_SHORT).show();
                 navigateToReservation();
             }
         });
@@ -226,29 +381,13 @@ public class CharityDashboardActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        // Reserve buttons
-        findViewById(R.id.btnReserve1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                reserveFoodListing(0);
-            }
-        });
-
-        findViewById(R.id.btnReserve2).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                reserveFoodListing(1);
-            }
-        });
+        // Note: Remove the hardcoded reserve buttons from onCreate
+        // We'll handle reserve buttons dynamically in createListingCardView
     }
 
     private void navigateToReservation() {
         Intent intent = new Intent(this, ReservationsActivity.class);
         startActivity(intent);
-    }
-
-    private void navigateToBrowseFood() {
-
     }
 
     private void navigateToNotification() {
@@ -263,11 +402,27 @@ public class CharityDashboardActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                moveTaskToBack(true);
+            }
+        });
+    }
+
     private void setupBottomNavigation() {
         // Clear existing menu items
         bottomNavigation.getMenu().clear();
 
-        // Add only the items you want for seller
+        // Add only the items you want for charity
         bottomNavigation.getMenu().add(Menu.NONE, R.id.nav_dashboard, 1, "BrowseFood")
                 .setIcon(R.drawable.ic_dashboard);
 
@@ -316,8 +471,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
         categoryAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedCategory = categories.get(position);
-                filterListings(); // Call the filter method
+                filterListings();
             }
         });
 
@@ -341,10 +495,10 @@ public class CharityDashboardActivity extends AppCompatActivity {
             boolean matchesCategory = selectedCategory.equals("All") ||
                     selectedCategory.equals(listing.getCategory());
 
-            // Check if listing is not expired
-            boolean isNotExpired = true; // In real app, check expiry date
+            // Check if listing is available
+            boolean isAvailable = "available".equals(listing.getStatus());
 
-            if (matchesSearch && matchesCategory && isNotExpired) {
+            if (matchesSearch && matchesCategory && isAvailable) {
                 filteredListings.add(listing);
             }
         }
@@ -353,6 +507,9 @@ public class CharityDashboardActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
+        // Clear existing views
+        llListingsContainer.removeAllViews();
+
         // Show/hide empty state
         if (filteredListings.isEmpty()) {
             cardEmptyState.setVisibility(View.VISIBLE);
@@ -360,9 +517,65 @@ public class CharityDashboardActivity extends AppCompatActivity {
         } else {
             cardEmptyState.setVisibility(View.GONE);
             llListingsContainer.setVisibility(View.VISIBLE);
+
+            // Add listing cards dynamically
+            for (int i = 0; i < filteredListings.size(); i++) {
+                FoodListing listing = filteredListings.get(i);
+                CardView listingCard = createListingCardView(listing, i);
+                if (listingCard != null) {
+                    llListingsContainer.addView(listingCard);
+
+                    // Add margin between cards
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) listingCard.getLayoutParams();
+                    params.bottomMargin = 16;
+                    listingCard.setLayoutParams(params);
+                }
+            }
         }
 
         updateListingsCount();
+    }
+
+    private CardView createListingCardView(FoodListing listing, int position) {
+        try {
+            // Inflate the listing card layout
+            LayoutInflater inflater = LayoutInflater.from(this);
+            CardView cardView = (CardView) inflater.inflate(
+                    R.layout.charity_food_listing_item, llListingsContainer, false);
+
+            // Get references to views
+            ImageView ivFoodIcon = cardView.findViewById(R.id.ivFoodIcon);
+            TextView tvFoodName = cardView.findViewById(R.id.tvFoodName);
+            TextView tvCategoryQuantity = cardView.findViewById(R.id.tvCategoryQuantity);
+            TextView tvRestaurant = cardView.findViewById(R.id.tvRestaurant);
+            TextView tvPickupTime = cardView.findViewById(R.id.tvPickupTime);
+            TextView tvExpiryDate = cardView.findViewById(R.id.tvExpiryDate);
+            MaterialButton btnReserve = cardView.findViewById(R.id.btnReserve);
+
+            // Set data
+            ivFoodIcon.setImageResource(listing.getIconResource());
+            tvFoodName.setText(listing.getName());
+            tvCategoryQuantity.setText(listing.getCategory() + " • " + listing.getQuantity());
+            tvRestaurant.setText(listing.getRestaurant());
+            tvPickupTime.setText("Pickup: " + listing.getPickupTime());
+            tvExpiryDate.setText("Expires: " + listing.getExpiryDate());
+
+            // Set reserve button click listener
+            btnReserve.setTag(position);
+            btnReserve.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int pos = (int) v.getTag();
+                    reserveFoodListing(pos);
+                }
+            });
+
+            return cardView;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void updateListingsCount() {
@@ -374,14 +587,68 @@ public class CharityDashboardActivity extends AppCompatActivity {
     private void reserveFoodListing(int position) {
         if (position < filteredListings.size()) {
             FoodListing listing = filteredListings.get(position);
+            String currentUserUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-            Toast.makeText(this,
-                    "Reserving: " + listing.getName() + " from " + listing.getRestaurant(),
-                    Toast.LENGTH_SHORT).show();
+            // Create a Map with the fields to update
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("status", "reserved");
+            updateData.put("reserved_by", currentUserUid);
+            updateData.put("reserved_charity", charityName);
+            updateData.put("updated_at", FieldValue.serverTimestamp()); // Optional but good practice
+
+            // Update the document in Firestore
+            db.collection("food_listings").document(listing.getDocumentId())
+                    .update(updateData)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            // Navigate to reservations page after successful update
+                            Intent intent = new Intent(CharityDashboardActivity.this, ReservationsActivity.class);
+                            intent.putExtra("listing_id", listing.getDocumentId());
+                            intent.putExtra("food_name", listing.getName());
+                            intent.putExtra("restaurant", listing.getRestaurant());
+                            intent.putExtra("quantity", listing.getQuantity());
+                            intent.putExtra("pickup_time", listing.getPickupTime());
+                            intent.putExtra("expiry_date", listing.getExpiryDate());
+                            intent.putExtra("seller_id", listing.getSellerId());
+                            startActivity(intent);
+
+                            Toast.makeText(CharityDashboardActivity.this,
+                                    "Successfully reserved: " + listing.getName(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(CharityDashboardActivity.this,
+                                    "Failed to reserve: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 
-    // FoodListing model class
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Reconnect listeners
+        if (currentUserId != null && mAuth.getCurrentUser() != null) {
+            setupFoodListingsListener();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Remove listeners to prevent memory leaks
+        if (listingsListener != null) {
+            listingsListener.remove();
+            listingsListener = null;
+        }
+    }
+
+    // Updated FoodListing model class
     public static class FoodListing {
         private String name;
         private String category;
@@ -390,9 +657,13 @@ public class CharityDashboardActivity extends AppCompatActivity {
         private String pickupTime;
         private String expiryDate;
         private int iconResource;
+        private String status;
+        private String sellerId;
+        private String documentId;
 
         public FoodListing(String name, String category, String quantity,
-                           String restaurant, String pickupTime, String expiryDate, int iconResource) {
+                           String restaurant, String pickupTime, String expiryDate,
+                           int iconResource, String status, String sellerId, String documentId) {
             this.name = name;
             this.category = category;
             this.quantity = quantity;
@@ -400,6 +671,9 @@ public class CharityDashboardActivity extends AppCompatActivity {
             this.pickupTime = pickupTime;
             this.expiryDate = expiryDate;
             this.iconResource = iconResource;
+            this.status = status;
+            this.sellerId = sellerId;
+            this.documentId = documentId;
         }
 
         // Getters
@@ -410,5 +684,8 @@ public class CharityDashboardActivity extends AppCompatActivity {
         public String getPickupTime() { return pickupTime; }
         public String getExpiryDate() { return expiryDate; }
         public int getIconResource() { return iconResource; }
+        public String getStatus() { return status; }
+        public String getSellerId() { return sellerId; }
+        public String getDocumentId() { return documentId; }
     }
 }

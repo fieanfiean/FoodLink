@@ -683,7 +683,8 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
                     foodListing.setPickupDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime()));
                     foodListing.setPickUpBy("");
                     foodListing.setPickupCharity("");
-                    foodListing.setReservedBy("");
+                    foodListing.setReservedId("");
+                    foodListing.setFoodName("");
                     foodListing.setCreatedAt(System.currentTimeMillis());
 
                     // Save to Firestore
@@ -794,7 +795,9 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         private String pickupDate;
         private String pickUpBy;
         private String pickupCharity;
-        private String reservedBy;
+        private String reservedId;
+
+        private String reservedName;
         private long createdAt;
         private String imageUrl;
         private String imageBase64;
@@ -875,8 +878,11 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
         public String getPickupCharity() { return pickupCharity; }
         public void setPickupCharity(String pickupCharity) { this.pickupCharity = pickupCharity; }
 
-        public String getReservedBy() { return reservedBy; }
-        public void setReservedBy(String reservedBy) { this.reservedBy = reservedBy; }
+        public String getReservedId() { return reservedId; }
+        public void setReservedId(String reservedId) { this.reservedId = reservedId; }
+
+        public String getReservedName() {return reservedName;}
+        public void  setReservedName(String reservedName){this.reservedName = reservedName; }
 
         public long getCreatedAt() { return createdAt; }
         public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
@@ -905,7 +911,8 @@ public class AddNewFoodListingActivity extends AppCompatActivity {
             map.put("pickup_date", pickupDate);
             map.put("pick_up_by", pickUpBy);
             map.put("pickup_charity", pickupCharity);
-            map.put("reserved_by", reservedBy);
+            map.put("reserved_id", reservedId);
+            map.put("reserved_charity", reservedName);
             map.put("created_at", createdAt);
 
             // Store Base64 string if available
