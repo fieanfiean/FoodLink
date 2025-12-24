@@ -45,7 +45,7 @@ import java.util.Locale;
 public class ReservationsActivity extends AppCompatActivity {
 
     // UI Components
-    private ImageView ivBack;
+//    private ImageView ivBack;
     private ImageView ivNotification;
     private TextInputEditText etSearch;
     private TextInputLayout statusFilterLayout;
@@ -118,7 +118,7 @@ public class ReservationsActivity extends AppCompatActivity {
 
     private void initViews() {
         // Toolbar components
-        ivBack = findViewById(R.id.ivBack);
+//        ivBack = findViewById(R.id.ivBack);
         ivNotification = findViewById(R.id.ivNotification);
 
         // Search and filter
@@ -392,12 +392,12 @@ public class ReservationsActivity extends AppCompatActivity {
 
     private void setupListeners() {
         // Back button
-        ivBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+//        ivBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                onBackPressed();
+//            }
+//        });
 
         // Notification icon
         ivNotification.setOnClickListener(new View.OnClickListener() {

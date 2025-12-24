@@ -58,7 +58,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
 
     // UI Components
     private ImageView ivNotification;
-    private ImageView ivProfile;
+//    private ImageView ivProfile;
     private TextView tvCharityName;
     private MaterialButton btnBrowseFood;
     private MaterialButton btnMyReservations;
@@ -131,7 +131,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
     private void initViews() {
         // Toolbar components
         ivNotification = findViewById(R.id.ivNotification);
-        ivProfile = findViewById(R.id.ivProfile);
+//        ivProfile = findViewById(R.id.ivProfile);
 
         // Welcome section
         tvCharityName = findViewById(R.id.tvCharityName);
@@ -337,12 +337,12 @@ public class CharityDashboardActivity extends AppCompatActivity {
         });
 
         // Profile icon
-        ivProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateToProfile();
-            }
-        });
+//        ivProfile.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                navigateToProfile();
+//            }
+//        });
 
         // Browse Food button
         btnBrowseFood.setOnClickListener(new View.OnClickListener() {

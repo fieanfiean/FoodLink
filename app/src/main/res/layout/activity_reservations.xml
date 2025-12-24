@@ -21,12 +21,12 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp">
 
-            <ImageView
-                android:id="@+id/ivBack"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_back"
-                app:tint="@android:color/white" />
+<!--            <ImageView-->
+<!--                android:id="@+id/ivBack"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:src="@drawable/ic_back"-->
+<!--                app:tint="@android:color/white" />-->
 
             <TextView
                 android:layout_width="0dp"
