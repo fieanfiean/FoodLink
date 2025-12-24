@@ -38,12 +38,12 @@
                 android:textStyle="bold"
                 android:gravity="center" />
 
-            <ImageView
-                android:id="@+id/ivNotification"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_notification"
-                app:tint="@android:color/white" />
+<!--            <ImageView-->
+<!--                android:id="@+id/ivNotification"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:src="@drawable/ic_notification"-->
+<!--                app:tint="@android:color/white" />-->
 
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
@@ -71,25 +71,25 @@
                 android:elevation="2dp">
 
                 <!-- Search Bar -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:hint="Search food items or sellers..."
-                    app:startIconDrawable="@drawable/ic_search"
-                    app:boxStrokeColor="@color/grey_300"
-                    app:hintTextColor="@color/grey_500"
-                    app:boxBackgroundColor="@color/surface_white"
-                    app:endIconTint="@color/colorPrimary">
+<!--                <com.google.android.material.textfield.TextInputLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+<!--                    android:hint="Search food items or sellers..."-->
+<!--                    app:startIconDrawable="@drawable/ic_search"-->
+<!--                    app:boxStrokeColor="@color/grey_300"-->
+<!--                    app:hintTextColor="@color/grey_500"-->
+<!--                    app:boxBackgroundColor="@color/surface_white"-->
+<!--                    app:endIconTint="@color/colorPrimary">-->
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSearch"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/grey_700"
-                        android:textSize="16sp" />
+<!--                    <com.google.android.material.textfield.TextInputEditText-->
+<!--                        android:id="@+id/etSearch"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:textColor="@color/grey_700"-->
+<!--                        android:textSize="16sp" />-->
 
-                </com.google.android.material.textfield.TextInputLayout>
+<!--                </com.google.android.material.textfield.TextInputLayout>-->
 
                 <!-- Filter Row -->
                 <LinearLayout

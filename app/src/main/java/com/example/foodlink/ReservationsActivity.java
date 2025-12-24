@@ -46,7 +46,7 @@ public class ReservationsActivity extends AppCompatActivity {
 
     // UI Components
 //    private ImageView ivBack;
-    private ImageView ivNotification;
+//    private ImageView ivNotification;
     private TextInputEditText etSearch;
     private TextInputLayout statusFilterLayout;
     private AutoCompleteTextView statusAutoComplete;
@@ -63,9 +63,7 @@ public class ReservationsActivity extends AppCompatActivity {
     private List<String> statusFilters = Arrays.asList(
             "All",
             "Upcoming",
-            "Pending",
             "Completed",
-            "Cancelled",
             "Expired"
     );
 
@@ -119,10 +117,10 @@ public class ReservationsActivity extends AppCompatActivity {
     private void initViews() {
         // Toolbar components
 //        ivBack = findViewById(R.id.ivBack);
-        ivNotification = findViewById(R.id.ivNotification);
+//        ivNotification = findViewById(R.id.ivNotification);
 
         // Search and filter
-        etSearch = findViewById(R.id.etSearch);
+//        etSearch = findViewById(R.id.etSearch);
         statusFilterLayout = findViewById(R.id.statusFilterLayout);
         statusAutoComplete = findViewById(R.id.statusAutoComplete);
 
@@ -400,26 +398,26 @@ public class ReservationsActivity extends AppCompatActivity {
 //        });
 
         // Notification icon
-        ivNotification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateToNotification();
-            }
-        });
+//        ivNotification.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                navigateToNotification();
+//            }
+//        });
 
         // Search functionality
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterReservations();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+//        etSearch.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                filterReservations();
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {}
+//        });
 
         // Browse Food button in empty state
         if (llEmptyState != null) {
@@ -513,20 +511,20 @@ public class ReservationsActivity extends AppCompatActivity {
     private void filterReservations() {
         filteredReservations.clear();
 
-        String searchQuery = etSearch.getText().toString().toLowerCase().trim();
+//        String searchQuery = etSearch.getText().toString().toLowerCase().trim();
         String selectedStatus = statusAutoComplete.getText().toString();
 
         for (Reservation reservation : reservations) {
             // Check if reservation matches search query
-            boolean matchesSearch = searchQuery.isEmpty() ||
-                    reservation.getFoodItem().toLowerCase().contains(searchQuery) ||
-                    reservation.getRestaurant().toLowerCase().contains(searchQuery);
+//            boolean matchesSearch = searchQuery.isEmpty() ||
+//                    reservation.getFoodItem().toLowerCase().contains(searchQuery) ||
+//                    reservation.getRestaurant().toLowerCase().contains(searchQuery);
 
             // Check if reservation matches selected status
             boolean matchesStatus = selectedStatus.equals("All") ||
                     selectedStatus.equalsIgnoreCase(reservation.getStatus());
 
-            if (matchesSearch && matchesStatus) {
+            if (matchesStatus) {
                 filteredReservations.add(reservation);
             }
         }

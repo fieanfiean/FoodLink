@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -43,8 +44,11 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 public class SellerDashboardActivity extends AppCompatActivity {
 
@@ -58,7 +62,7 @@ public class SellerDashboardActivity extends AppCompatActivity {
     // Firestore
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private ListenerRegistration activeListener, reservedListener, completedListener, totalQuantityListener;
+    private ListenerRegistration allListingsListener, totalQuantityListener;
 
     // Current user
     private String currentUserId;
@@ -168,18 +172,18 @@ public class SellerDashboardActivity extends AppCompatActivity {
         Log.d(TAG, "=== SETTING UP REAL-TIME LISTENERS ===");
         Log.d(TAG, "Current user ID: " + currentUserId);
 
-        // ========== ACTIVE LISTINGS COUNT & DISPLAY ==========
-        Query activeQuery = db.collection("food_listings")
-                .whereEqualTo("seller_id", currentUserId)
-                .whereEqualTo("status", "available");
-//                .orderBy("created_at");
+        // ========== ALL LISTINGS (ACTIVE, RESERVED, COMPLETED) ==========
+        // Remove orderBy since created_at is stored as a number, not a Timestamp
+        Query allListingsQuery = db.collection("food_listings")
+                .whereEqualTo("seller_id", currentUserId);
+        // Remove: .orderBy("created_at", Query.Direction.DESCENDING);
 
-        activeListener = activeQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        allListingsListener = allListingsQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot querySnapshot,
                                 @Nullable FirebaseFirestoreException error) {
                 if (error != null) {
-                    Log.w(TAG, "Active listings listen failed.", error);
+                    Log.w(TAG, "All listings listen failed.", error);
                     Toast.makeText(SellerDashboardActivity.this,
                             "Error loading listings: " + error.getMessage(),
                             LENGTH_SHORT).show();
@@ -187,62 +191,56 @@ public class SellerDashboardActivity extends AppCompatActivity {
                 }
 
                 if (querySnapshot != null) {
-                    int count = querySnapshot.size();
-                    tvActiveCount.setText(String.valueOf(count));
+                    // Convert to list for sorting
+                    List<DocumentSnapshot> documents = new ArrayList<>(querySnapshot.getDocuments());
 
-                    // Update active listings display
-                    updateActiveListings(querySnapshot);
+                    // Sort manually by created_at (descending - newest first)
+                    Collections.sort(documents, (doc1, doc2) -> {
+                        Long time1 = getCreatedAtAsLong(doc1);
+                        Long time2 = getCreatedAtAsLong(doc2);
+                        return time2.compareTo(time1); // Descending order
+                    });
+
+                    int totalCount = documents.size();
+
+                    // Calculate counts by status
+                    int activeCount = 0;
+                    int reservedCount = 0;
+                    int completedCount = 0;
+
+                    for (DocumentSnapshot doc : documents) {
+                        String status = doc.getString("status");
+                        if (status != null) {
+                            switch (status.toLowerCase()) {
+                                case "available":
+                                    activeCount++;
+                                    break;
+                                case "reserved":
+                                    reservedCount++;
+                                    break;
+                                case "completed":
+                                    completedCount++;
+                                    break;
+                            }
+                        }
+                    }
+
+                    // Update all count displays
+                    tvActiveCount.setText(String.valueOf(activeCount));
+                    tvReservedCount.setText(String.valueOf(reservedCount));
+                    tvCompletedCount.setText(String.valueOf(completedCount));
+
+                    // Update the listings display with ALL listings (sorted)
+                    updateAllListings(documents);
 
                     // Update empty state
-                    updateEmptyState(count);
+                    updateEmptyState(totalCount);
 
-                    Log.d(TAG, "Active listings updated: " + count);
-
-                    // DEBUG: Log all active listings
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        Log.d(TAG, "Active: " + doc.getString("food_name") + " - " + doc.getString("status"));
-                    }
+                    Log.d(TAG, "All listings updated - Total: " + totalCount +
+                            " (Active: " + activeCount +
+                            ", Reserved: " + reservedCount +
+                            ", Completed: " + completedCount + ")");
                 }
-            }
-        });
-
-        // ========== RESERVED LISTINGS COUNT ==========
-        Query reservedQuery = db.collection("food_listings")
-                .whereEqualTo("seller_id", currentUserId)
-                .whereIn("status", Arrays.asList("reserved"));
-
-        reservedListener = reservedQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot querySnapshot,
-                                @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.w(TAG, "Reserved listings listen failed.", error);
-                    return;
-                }
-
-                int count = querySnapshot != null ? querySnapshot.size() : 0;
-                tvReservedCount.setText(String.valueOf(count));
-                Log.d(TAG, "Reserved listings updated: " + count);
-            }
-        });
-
-        // ========== COMPLETED LISTINGS COUNT ==========
-        Query completedQuery = db.collection("food_listings")
-                .whereEqualTo("seller_id", currentUserId)
-                .whereEqualTo("status", "completed");
-
-        completedListener = completedQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot querySnapshot,
-                                @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.w(TAG, "Completed listings listen failed.", error);
-                    return;
-                }
-
-                int count = querySnapshot != null ? querySnapshot.size() : 0;
-                tvCompletedCount.setText(String.valueOf(count));
-                Log.d(TAG, "Completed listings updated: " + count);
             }
         });
 
@@ -292,15 +290,39 @@ public class SellerDashboardActivity extends AppCompatActivity {
         });
     }
 
-    private void updateActiveListings(QuerySnapshot querySnapshot) {
-        Log.d(TAG, "=== UPDATE ACTIVE LISTINGS CALLED ===");
-        Log.d(TAG, "Number of active listings: " + querySnapshot.size());
+    private Long getCreatedAtAsLong(DocumentSnapshot document) {
+        try {
+            Object createdAtObj = document.get("created_at");
+            if (createdAtObj == null) return 0L;
+
+            if (createdAtObj instanceof Long) {
+                return (Long) createdAtObj;
+            } else if (createdAtObj instanceof Double) {
+                return ((Double) createdAtObj).longValue();
+            } else if (createdAtObj instanceof Integer) {
+                return ((Integer) createdAtObj).longValue();
+            } else if (createdAtObj instanceof String) {
+                try {
+                    return Long.parseLong((String) createdAtObj);
+                } catch (NumberFormatException e) {
+                    return 0L;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting created_at: " + e.getMessage());
+        }
+        return 0L;
+    }
+
+    private void updateAllListings(List<DocumentSnapshot> documents) {
+        Log.d(TAG, "=== UPDATE ALL LISTINGS CALLED ===");
+        Log.d(TAG, "Number of all listings: " + documents.size());
 
         // Clear all existing views in the container
         llListingsContainer.removeAllViews();
 
-        if (querySnapshot.isEmpty()) {
-            Log.d(TAG, "No active listings found");
+        if (documents.isEmpty()) {
+            Log.d(TAG, "No listings found");
             llListingsContainer.setVisibility(View.GONE);
             return;
         }
@@ -308,8 +330,8 @@ public class SellerDashboardActivity extends AppCompatActivity {
         // Show the container since we have listings
         llListingsContainer.setVisibility(View.VISIBLE);
 
-        // For each active listing, create and add a CardView
-        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+        // For each listing, create and add a CardView
+        for (DocumentSnapshot document : documents) {
             try {
                 // Get the listing data
                 String foodName = document.getString("food_name");
@@ -322,7 +344,7 @@ public class SellerDashboardActivity extends AppCompatActivity {
                 String documentId = document.getId();
                 String imageBase64 = document.getString("image_base64");
 
-                Log.d(TAG, "Creating card for: " + foodName + " (ID: " + documentId + ")");
+                Log.d(TAG, "Creating card for: " + foodName + " (ID: " + documentId + ", Status: " + status + ")");
 
                 if (foodName == null || foodName.isEmpty()) {
                     Log.w(TAG, "Skipping listing with no food name");
@@ -338,11 +360,12 @@ public class SellerDashboardActivity extends AppCompatActivity {
                 // Add the CardView to the container
                 if (listingCard != null) {
                     llListingsContainer.addView(listingCard);
-                    Log.d(TAG, "Card added for: " + foodName);
+                    Log.d(TAG, "Card added for: " + foodName + " (Status: " + status + ")");
                 }
 
             } catch (Exception e) {
                 Log.e(TAG, "Error creating listing card: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -389,7 +412,15 @@ public class SellerDashboardActivity extends AppCompatActivity {
 
             // Set data from listing
             tvFoodName.setText(foodName != null ? foodName : "Food Item");
-            tvStatus.setText(status != null ? status : "Available");
+
+            // Format status with proper casing
+            if (status != null && !status.isEmpty()) {
+                String formattedStatus = status.substring(0, 1).toUpperCase() +
+                        status.substring(1).toLowerCase();
+                tvStatus.setText(formattedStatus);
+            } else {
+                tvStatus.setText("Available");
+            }
 
             // Format category and quantity
             String categoryText = category != null ? category : "Food";
@@ -408,45 +439,54 @@ public class SellerDashboardActivity extends AppCompatActivity {
             loadFoodImage(imageBase64, ivFoodImage, tvNoImage, foodName);
 
             // Set status color and button text based on status
-//            String currentStatus = status != null ? status.toLowerCase() : "available";
-//            switch (currentStatus) {
-//                case "available":
-//                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.green_500));
-//                    tvStatus.setBackgroundResource(R.drawable.status_available_bg);
-//                    btnAction.setText("Mark Reserved");
-//                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
-//                            ContextCompat.getColor(this, R.color.green_500)));
-//                    btnAction.setOnClickListener(v -> updateListingStatus(documentId, "available"));
-//                    break;
-//                case "reserved":
-//                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.orange_500));
-//                    tvStatus.setBackgroundResource(R.drawable.status_reserved_bg);
-//                    btnAction.setText("Mark Complete");
-//                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
-//                            ContextCompat.getColor(this, R.color.orange_500)));
-//                    btnAction.setOnClickListener(v -> updateListingStatus(documentId, "reserved"));
-//                    break;
-//                case "completed":
-//                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.blue_500));
-//                    tvStatus.setBackgroundResource(R.drawable.status_complete_bg);
+            String currentStatus = status != null ? status.toLowerCase() : "available";
+            switch (currentStatus) {
+                case "available":
+                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.green_500));
+                    tvStatus.setBackgroundResource(R.drawable.status_available_bg);
+                    btnAction.setText("Delete");
+                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
+                            ContextCompat.getColor(this, R.color.green_500)));
+                    btnAction.setOnClickListener(v -> showDeleteConfirmation(documentId));
+                    break;
+                case "reserved":
+                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.orange_500));
+                    tvStatus.setBackgroundResource(R.drawable.status_reserved_bg);
+                    btnAction.setText("Delete");
+                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
+                            ContextCompat.getColor(this, R.color.green_500)));
+                    btnAction.setOnClickListener(v -> showDeleteConfirmation(documentId));
+                    break;
+                case "completed":
+                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.blue_500));
+                    tvStatus.setBackgroundResource(R.drawable.status_complete_bg);
 //                    btnAction.setText("Completed");
 //                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
 //                            ContextCompat.getColor(this, R.color.blue_500)));
-//                    btnAction.setEnabled(false);
-//                    break;
-//                default:
-//                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.green_500));
-//                    tvStatus.setBackgroundResource(R.drawable.status_available_bg);
-//                    btnAction.setText("Mark Reserved");
-//                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
-//                            ContextCompat.getColor(this, R.color.green_500)));
-//                    btnAction.setOnClickListener(v -> updateListingStatus(documentId, "available"));
-//            }
+                    btnAction.setEnabled(false);
+                    break;
+                default:
+                    tvStatus.setTextColor(ContextCompat.getColor(this, R.color.green_500));
+                    tvStatus.setBackgroundResource(R.drawable.status_available_bg);
+                    btnAction.setText("Mark Reserved");
+                    btnAction.setBackgroundTintList(ColorStateList.valueOf(
+                            ContextCompat.getColor(this, R.color.green_500)));
+                    btnAction.setOnClickListener(v -> updateListingStatus(documentId, "available"));
+            }
 
             // Set edit button click listener
             btnEdit.setOnClickListener(v -> editListing(documentId));
 
-            btnAction.setOnClickListener(view -> showDeleteConfirmation(documentId));
+            // Set delete button (or action button) click listener
+            btnAction.setOnClickListener(view -> {
+                if (currentStatus.equals("available") || currentStatus.equals("reserved")) {
+                    // For available/reserved listings, the button changes status
+                    // This is already handled in the switch statement above
+                } else {
+                    // For other statuses or additional actions
+                    showDeleteConfirmation(documentId);
+                }
+            });
 
             // Set click listener for the whole card
             cardView.setOnClickListener(v -> viewListingDetails(documentId));
@@ -547,30 +587,16 @@ public class SellerDashboardActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .show();
     }
-    private void deleteListing(String listingId) {
-        // Show loading
-//        btnDelete.setText("Deleting...");
-//        btnDelete.setEnabled(false);
 
+    private void deleteListing(String listingId) {
         db.collection("food_listings").document(listingId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Listing deleted successfully", Toast.LENGTH_SHORT).show();
-
-                    // Return to dashboard with delete flag
-//                    Intent resultIntent = new Intent();
-//                    resultIntent.putExtra("listing_deleted", true);
-//                    resultIntent.putExtra("listing_id", listingId);
-//                    setResult(RESULT_OK, resultIntent);
-//                    finish();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error deleting listing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error deleting listing: " + e.getMessage());
-
-                    // Reset button
-//                    btnDelete.setText("Delete Listing");
-//                    btnDelete.setEnabled(true);
                 });
     }
 
@@ -579,8 +605,8 @@ public class SellerDashboardActivity extends AppCompatActivity {
         // TODO: Implement details view
     }
 
-    private void updateEmptyState(int activeCount) {
-        if (activeCount == 0) {
+    private void updateEmptyState(int totalCount) {
+        if (totalCount == 0) {
             cardEmptyState.setVisibility(View.VISIBLE);
         } else {
             cardEmptyState.setVisibility(View.GONE);
@@ -594,14 +620,14 @@ public class SellerDashboardActivity extends AppCompatActivity {
         });
 
         // View All Listings
-//        findViewById(R.id.tvViewAll).setOnClickListener(v -> {
-//            navigateToAllListings();
-//        });
+        // findViewById(R.id.tvViewAll).setOnClickListener(v -> {
+        //     navigateToAllListings();
+        // });
 
         // Notification icon
-//        findViewById(R.id.ivNotification).setOnClickListener(v -> {
-//            navigateToNotifications();
-//        });
+        // findViewById(R.id.ivNotification).setOnClickListener(v -> {
+        //     navigateToNotifications();
+        // });
     }
 
     private void setupBackPressHandler() {
@@ -705,17 +731,9 @@ public class SellerDashboardActivity extends AppCompatActivity {
     private void removeListeners() {
         Log.d(TAG, "Removing listeners");
 
-        if (activeListener != null) {
-            activeListener.remove();
-            activeListener = null;
-        }
-        if (reservedListener != null) {
-            reservedListener.remove();
-            reservedListener = null;
-        }
-        if (completedListener != null) {
-            completedListener.remove();
-            completedListener = null;
+        if (allListingsListener != null) {
+            allListingsListener.remove();
+            allListingsListener = null;
         }
         if (totalQuantityListener != null) {
             totalQuantityListener.remove();

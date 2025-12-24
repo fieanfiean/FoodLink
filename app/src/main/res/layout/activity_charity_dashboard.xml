@@ -46,13 +46,13 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"/>
 
-                <ImageView
-                    android:id="@+id/ivNotification"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_notification"
-                    app:tint="#666666"
-                    android:layout_marginEnd="16dp"/>
+<!--                <ImageView-->
+<!--                    android:id="@+id/ivNotification"-->
+<!--                    android:layout_width="24dp"-->
+<!--                    android:layout_height="24dp"-->
+<!--                    android:src="@drawable/ic_notification"-->
+<!--                    app:tint="#666666"-->
+<!--                    android:layout_marginEnd="16dp"/>-->
 
 <!--                <ImageView-->
 <!--                    android:id="@+id/ivProfile"-->
@@ -163,25 +163,25 @@
             </LinearLayout>
 
             <!-- Search Bar -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:boxStrokeColor="#E0E0E0"
-                app:startIconDrawable="@drawable/ic_search"
-                app:startIconTint="#666666"
-                android:layout_marginBottom="16dp">
+<!--            <com.google.android.material.textfield.TextInputLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+<!--                app:boxStrokeColor="#E0E0E0"-->
+<!--                app:startIconDrawable="@drawable/ic_search"-->
+<!--                app:startIconTint="#666666"-->
+<!--                android:layout_marginBottom="16dp">-->
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search food items or sellers..."
-                    android:textSize="14sp"
-                    android:textColor="#333333"
-                    android:maxLines="1"/>
+<!--&lt;!&ndash;                <com.google.android.material.textfield.TextInputEditText&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/etSearch"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:hint="Search food items or sellers..."&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textColor="#333333"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:maxLines="1"/>&ndash;&gt;-->
 
-            </com.google.android.material.textfield.TextInputLayout>
+<!--            </com.google.android.material.textfield.TextInputLayout>-->
 
             <!-- Filter Chips -->
             <TextView

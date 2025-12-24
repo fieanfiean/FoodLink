@@ -35,7 +35,7 @@ public class HelpSupportActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        etSearch = findViewById(R.id.etSearch);
+//        etSearch = findViewById(R.id.etSearch);
 
         // Back button
         findViewById(R.id.btnBack).setOnClickListener(new View.OnClickListener() {

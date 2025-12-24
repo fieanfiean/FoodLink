@@ -3,6 +3,7 @@ package com.example.foodlink;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,11 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ReservationsActivity.Reservation reservation = reservations.get(position);
 
+        Log.d("ReservationsDebug", "Position: " + position +
+                " | Food: " + reservation.getFoodItem() +
+                " | Status: " + reservation.getStatus() +
+                " | Status lower: " + reservation.getStatus().toLowerCase());
+
         // Set data
         holder.tvFoodItem.setText(reservation.getFoodItem());
         holder.tvRestaurant.setText(reservation.getRestaurant());
@@ -60,7 +66,9 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
 
         // Set status background
         int statusBgResId = R.drawable.bg_status_upcoming;
-        switch (reservation.getStatus().toLowerCase()) {
+        String status = reservation.getStatus().toLowerCase();
+
+        switch (status) {
             case "upcoming":
                 statusBgResId = R.drawable.bg_status_upcoming;
                 break;
@@ -74,7 +82,7 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
                 statusBgResId = R.drawable.bg_status_cancelled;
                 break;
             case "expired":
-                statusBgResId = R.drawable.bg_status_cancelled; // Use cancelled style for expired
+                statusBgResId = R.drawable.bg_status_cancelled;
                 break;
             default:
                 statusBgResId = R.drawable.bg_status_upcoming;
@@ -82,7 +90,7 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
         }
         holder.tvStatus.setBackgroundResource(statusBgResId);
 
-        // Load food image - CORRECTED: Moved outside click listener
+        // Load food image
         if (holder.ivFoodImage != null && holder.tvNoImage != null) {
             String imageBase64 = reservation.getImageBase64();
             if (imageBase64 != null && !imageBase64.isEmpty()) {
@@ -93,18 +101,65 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
             }
         }
 
-        // Set button visibility based on status - SAFELY
-        if (holder.llActionButtons != null && holder.llCompletedActions != null) {
-            if ("completed".equals(reservation.getStatus()) || "cancelled".equals(reservation.getStatus()) || "expired".equals(reservation.getStatus())) {
+        // Set button visibility based on status - SIMPLIFIED
+        Log.d("ReservationsDebug", "Setting visibility for status: " + status);
+
+        // First, hide buttons directly
+        if ("completed".equals(status)) {
+            Log.d("ReservationsDebug", "HIDING buttons for completed status");
+
+            // Hide buttons individually
+            if (holder.btnConfirmPickup != null) {
+                holder.btnConfirmPickup.setVisibility(View.GONE);
+            }
+            if (holder.btnCancelReservation != null) {
+                holder.btnCancelReservation.setVisibility(View.GONE);
+            }
+
+            // Hide the layout too
+            if (holder.llActionButtons != null) {
                 holder.llActionButtons.setVisibility(View.GONE);
-                holder.llCompletedActions.setVisibility(View.VISIBLE);
-            } else {
-                holder.llActionButtons.setVisibility(View.VISIBLE);
+            }
+
+            // Hide completed actions
+            if (holder.llCompletedActions != null) {
                 holder.llCompletedActions.setVisibility(View.GONE);
+            }
+        } else {
+            Log.d("ReservationsDebug", "SHOWING buttons for status: " + status);
+
+            // Show buttons
+            if (holder.btnConfirmPickup != null) {
+                holder.btnConfirmPickup.setVisibility(View.VISIBLE);
+            }
+            if (holder.btnCancelReservation != null) {
+                holder.btnCancelReservation.setVisibility(View.VISIBLE);
+            }
+
+            // Show the layout
+            if (holder.llActionButtons != null) {
+                holder.llActionButtons.setVisibility(View.VISIBLE);
+            }
+
+            // Handle other statuses
+            if ("cancelled".equals(status) || "expired".equals(status)) {
+                if (holder.llActionButtons != null) {
+                    holder.llActionButtons.setVisibility(View.GONE);
+                }
+                if (holder.llCompletedActions != null) {
+                    holder.llCompletedActions.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (holder.llActionButtons != null) {
+                    holder.llActionButtons.setVisibility(View.VISIBLE);
+                }
+                if (holder.llCompletedActions != null) {
+                    holder.llCompletedActions.setVisibility(View.GONE);
+                }
             }
         }
 
-        // Set click listeners - SAFELY
+        // Set click listeners
         if (holder.btnConfirmPickup != null) {
             holder.btnConfirmPickup.setOnClickListener(v -> {
                 if (listener != null) {
@@ -178,38 +233,42 @@ public class ReservationsAdapter extends RecyclerView.Adapter<ReservationsAdapte
         TextView tvStatus, tvFoodItem, tvRestaurant, tvQuantity, tvPickupTime, tvExpiryDate;
         Button btnConfirmPickup, btnCancelReservation, btnViewDetails, btnReorder;
         LinearLayout llActionButtons, llCompletedActions;
-        ImageView ivFoodImage;  // Added
-        TextView tvNoImage;     // Added
+        ImageView ivFoodImage;
+        TextView tvNoImage;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Initialize all views with null checks
-            try {
-                // Image views
-                ivFoodImage = itemView.findViewById(R.id.ivFoodImage);
-                tvNoImage = itemView.findViewById(R.id.tvNoImage);
+            // Initialize all views with debugging
+            Log.d("ViewHolderDebug", "Initializing ViewHolder...");
 
-                // Status and text views
-                tvStatus = itemView.findViewById(R.id.tvStatus);
-                tvFoodItem = itemView.findViewById(R.id.tvFoodItem);
-                tvRestaurant = itemView.findViewById(R.id.tvRestaurant);
-                tvQuantity = itemView.findViewById(R.id.tvQuantity);
-                tvPickupTime = itemView.findViewById(R.id.tvPickupTime);
-                tvExpiryDate = itemView.findViewById(R.id.tvExpiryDate);
+            // Image views
+            ivFoodImage = itemView.findViewById(R.id.ivFoodImage);
+            tvNoImage = itemView.findViewById(R.id.tvNoImage);
 
-                // Button views
-//                btnConfirmPickup = itemView.findViewById(R.id.btnConfirmPickup);
-                btnCancelReservation = itemView.findViewById(R.id.btnCancelReservation);
-                btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
-//                btnReorder = itemView.findViewById(R.id.btnReorder);
+            // Status and text views
+            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvFoodItem = itemView.findViewById(R.id.tvFoodItem);
+            tvRestaurant = itemView.findViewById(R.id.tvRestaurant);
+            tvQuantity = itemView.findViewById(R.id.tvQuantity);
+            tvPickupTime = itemView.findViewById(R.id.tvPickupTime);
+            tvExpiryDate = itemView.findViewById(R.id.tvExpiryDate);
 
-                // Layout views
-//                llActionButtons = itemView.findViewById(R.id.llActionButtons);
-//                llCompletedActions = itemView.findViewById(R.id.llCompletedActions);
-            } catch (Exception e) {
-                // Handle missing views gracefully
-            }
+            // Button views
+            btnConfirmPickup = itemView.findViewById(R.id.btnConfirmPickup);
+            btnCancelReservation = itemView.findViewById(R.id.btnCancelReservation);
+            btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
+            btnReorder = itemView.findViewById(R.id.btnReorder);
+
+            // Layout views
+            llActionButtons = itemView.findViewById(R.id.llActionButtons);
+            llCompletedActions = itemView.findViewById(R.id.llCompletedActions);
+
+            // Log which views were found
+            Log.d("ViewHolderDebug", "btnConfirmPickup found: " + (btnConfirmPickup != null));
+            Log.d("ViewHolderDebug", "btnCancelReservation found: " + (btnCancelReservation != null));
+            Log.d("ViewHolderDebug", "llActionButtons found: " + (llActionButtons != null));
+            Log.d("ViewHolderDebug", "llCompletedActions found: " + (llCompletedActions != null));
         }
     }
 }

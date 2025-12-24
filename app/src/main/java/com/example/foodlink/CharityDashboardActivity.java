@@ -57,12 +57,12 @@ import java.util.Map;
 public class CharityDashboardActivity extends AppCompatActivity {
 
     // UI Components
-    private ImageView ivNotification;
+//    private ImageView ivNotification;
 //    private ImageView ivProfile;
     private TextView tvCharityName;
     private MaterialButton btnBrowseFood;
     private MaterialButton btnMyReservations;
-    private TextInputEditText etSearch;
+//    private TextInputEditText etSearch;
     private TextInputLayout filterDropdownLayout;
     private AutoCompleteTextView categoryAutoComplete;
     private TextView tvListingCount;
@@ -130,7 +130,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
 
     private void initViews() {
         // Toolbar components
-        ivNotification = findViewById(R.id.ivNotification);
+//        ivNotification = findViewById(R.id.ivNotification);
 //        ivProfile = findViewById(R.id.ivProfile);
 
         // Welcome section
@@ -141,7 +141,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
         btnMyReservations = findViewById(R.id.btnMyReservations);
 
         // Search and filter
-        etSearch = findViewById(R.id.etSearch);
+//        etSearch = findViewById(R.id.etSearch);
         filterDropdownLayout = findViewById(R.id.filterDropdownLayout);
         categoryAutoComplete = findViewById(R.id.categoryAutoComplete);
 
@@ -329,12 +329,12 @@ public class CharityDashboardActivity extends AppCompatActivity {
 
     private void setupListeners() {
         // Notification icon
-        ivNotification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateToNotification();
-            }
-        });
+//        ivNotification.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                navigateToNotification();
+//            }
+//        });
 
         // Profile icon
 //        ivProfile.setOnClickListener(new View.OnClickListener() {
@@ -361,18 +361,18 @@ public class CharityDashboardActivity extends AppCompatActivity {
         });
 
         // Search functionality
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterListings();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+//        etSearch.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                filterListings();
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {}
+//        });
     }
 
     private void navigateToReservation() {
@@ -472,14 +472,14 @@ public class CharityDashboardActivity extends AppCompatActivity {
     private void filterListings() {
         filteredListings.clear();
 
-        String searchQuery = etSearch.getText().toString().toLowerCase().trim();
+//        String searchQuery = etSearch.getText().toString().toLowerCase().trim();
         String selectedCategory = categoryAutoComplete.getText().toString();
 
         for (FoodListing listing : foodListings) {
             // Check if listing matches search query
-            boolean matchesSearch = searchQuery.isEmpty() ||
-                    listing.getName().toLowerCase().contains(searchQuery) ||
-                    listing.getRestaurant().toLowerCase().contains(searchQuery);
+//            boolean matchesSearch = searchQuery.isEmpty() ||
+//                    listing.getName().toLowerCase().contains(searchQuery) ||
+//                    listing.getRestaurant().toLowerCase().contains(searchQuery);
 
             // Check if listing matches selected category
             boolean matchesCategory = selectedCategory.equals("All") ||
@@ -488,7 +488,7 @@ public class CharityDashboardActivity extends AppCompatActivity {
             // Check if listing is available
             boolean isAvailable = "available".equals(listing.getStatus());
 
-            if (matchesSearch && matchesCategory && isAvailable) {
+            if (matchesCategory && isAvailable) {
                 filteredListings.add(listing);
             }
         }
